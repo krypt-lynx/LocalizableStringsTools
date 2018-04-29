@@ -35,139 +35,12 @@ namespace StringsCore
         SyntaxError
     }
 
-
-    public class LocEntry
-    {
-        public enum EntryType
-        {
-            Text,
-            BlockComment,
-            LineComment,
-            LocPair
-        }
-    }
-
-    public class LocTextEntry : LocEntry
-    { 
-        public string text;
-
-        public LocTextEntry(string text)
-        {
-            this.text = text;
-        }
-    }
-
-    public class LocTreeEntry : LocEntry
-    {
-        public List<LocEntry> entries = new List<LocEntry>();
-        public void Append(LocEntry entry)
-        {
-            entries.Add(entry);
-        }
-    }
-
-    public class TextBlock : LocTextEntry
-    {
-        public TextBlock(string text) : base(text) { }
-
-        public override string ToString()
-        {
-            return String.Format("t: {0}", text);
-        }
-    }
-
-    public class BlockCommentBlock : LocTextEntry
-    {
-        public BlockCommentBlock(string text) : base(text) { }
-
-        public override string ToString()
-        {
-            return String.Format("bc: {0}", text);
-        }
-    }
-
-    public class LineCommentBlock : LocTextEntry
-    {
-        public LineCommentBlock(string text) : base(text) { }
-
-        public override string ToString()
-        {
-            return string.Format("lc: {0}", text);
-        }
-    }
-
-    public class SeparatorBlock : LocTextEntry
-    {
-        public SeparatorBlock() : base("=") { }
-
-        public override string ToString()
-        {
-            return "=";
-        }
-    }
-
-    public class SemicolonBlock : LocTextEntry
-    {
-        public SemicolonBlock() : base(";") { }
-
-        public override string ToString()
-        {
-            return "\"; \"";
-        }
-    }
-
-    public class LocPairBlock : LocTreeEntry
-    {
-        public LocPairBlock()
-        {
-
-        }
-
-        public override string ToString()
-        {
-            StringBuilder sb = new StringBuilder("kv: ");
-            foreach (LocEntry entry in entries)
-            {
-                sb.Append(entry.ToString());
-                sb.Append("; ");
-            }
-
-            return sb.ToString();
-        }
-    }
-
-    public class KeyBlock : LocTextEntry
-    {
-        public KeyBlock(string text) : base(text) { }
-
-        public override string ToString()
-        {
-            return string.Format("kb: {0}", text);
-        }
-    }
-
-    public class ValueBlock: LocTextEntry
-    {
-        public ValueBlock(string text) : base(text) { }
-
-        public override string ToString()
-        {
-            return string.Format("vb: {0}", text);
-        }
-    }
-
-    public class LocFile : LocTreeEntry
-    {
-
-    }
-
     public class LocFileParser
     {
 
         LocFile document = null;
         private Stack<LocTreeEntry> docStack = null;
 
-        public List<KeyValuePair<string, string>> localizationPairs = new List<KeyValuePair<string, string>>();
         string currentKey = null;
         string currentValue = null;
 
@@ -178,7 +51,10 @@ namespace StringsCore
         {
             TextReader locReader = new StreamReader(path);
 
+            document = new LocFile();
             this.Parse(locReader);
+            document.FinalizeTree();
+            
 
             locReader.Close();
         }
@@ -187,16 +63,9 @@ namespace StringsCore
         private ParserStringSubstate stringSubstate;
         private Stack<ParserState> statesStack;
 
-        /*
-        private void appendBlockIfNeeded(LocEntry.EntryType type, String text)
-        {
-            if (text)
-        }
-        */
 
         private void Parse(TextReader reader)
         {
-            document = new LocFile();
             docStack = new Stack<LocTreeEntry>();
             docStack.Push(document);
 
@@ -358,7 +227,6 @@ namespace StringsCore
                     break;
                 case ';':
                     {
-                        localizationPairs.Add(new KeyValuePair<string, string>(currentKey, currentValue));
                         AppendTextBlockIfNeeded();
                         docStack.Peek().Append(new SemicolonBlock());
                         docStack.Pop();
