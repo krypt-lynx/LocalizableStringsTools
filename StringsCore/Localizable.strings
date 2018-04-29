@@ -1,0 +1,477 @@
+/*
+  Localizable.strings
+  Yol
+
+  Created by Alexandr Chernyshev on 9/1/14.
+  Copyright (c) 2014 Alexandr Chernyshev. All rights reserved.
+*/
+
+//Server
+"server.notrespond"                                     = "Сервер не отвечает";
+"server.unknownrespond"                                 = "Сервер не отвечает";
+"server.emptyrespond"                                   = "Сервер не отвечает";
+
+//Common
+"common.from"                                           = "из";
+"common.year0"                                          = "лет";
+"common.year1"                                          = "год";
+"common.year5"                                          = "года";
+"common.yearother"                                      = "лет";
+"common.donebutton!"                                    = "Готово!";
+"common.donebutton"                                     = "Готово";
+"common.savebutton"                                     = "Сохранить";
+"common.nextbutton"                                     = "Далее";
+"common.yesbutton"                                      = "Да";
+"common.nobutton"                                       = "Нет";
+"common.cancelbutton"                                   = "Отмена";
+"common.editbutton"                                     = "Изменить";
+"common.deletebutton"                                   = "Удалить";
+"common.copybutton"                                     = "Копировать";
+"common.closebutton"                                    = "Закрыть";
+"common.callbutton"                                     = "Позвонить";
+"common.gendeetypemale"                                 = "Мужской";
+"common.gendeetypefemale"                               = "Женский";
+"common.share"                                          = "Поделиться";
+"common.sharesubject"                                   = "\"YOL\" - социальная сеть для участников дорожного движения Азербайджана.";
+"common.sharetitle"                                     = "YOL";
+"common.support"                                        = "Техподдержка";
+"common.appstore"                                       = "AppStore";
+"common.backbutton"                                     = "Назад";
+"common.choose"                                         = "Выбрать";
+"common.error"                                          = "Ошибка";
+
+"common.unsupportedversion"                             = "Ваша версия приложения больше не поддерживается. Обновите версию в AppStore";
+"common.imagetoosmall"                                  = "Размер данного изображения слишком маленький, попробуйте загрузить другое изображение";
+"common.accountremoved"                                 = "Ваш аккаунт помечен как удаленный. В течение 30 дней вы можете отменить удаление аккаунта, просто авторизовавшись снова. По истечении этого срока аккаунт будет удален, а все ваши данные будут безвозвратно утеряны.";
+
+//LoginController
+"logincontroller.phoneplaceholder"                      = "Номер телефона";
+"logincontroller.passwordplaceholder"                   = "Пароль";
+"logincontroller.registebutton"                         = "Регистрация";
+"logincontroller.forgotbutton"                          = "Забыли пароль?";
+"logincontroller.classmatesbutton"                      = "Войти через Одноклассники";
+"logincontroller.facebookbutton"                        = "Войти через Facebook";
+"logincontroller.mailbutton"                            = "Войти через Mail.ru";
+
+//SplashViewController
+"splashviewcontroller.syncdata"                         = "Синхронизация данных";
+
+//ResetPasswordViewController
+"resetpasswordcontroller.title"                         = "Забыл пароль";
+"resetpasswordcontroller.restoretitle"                  = "Восстановление аккаунта";
+"resetpasswordcontroller.descriptionlabel"              = "Пароль, в котором есть и буквы, и цифры, сложнее взломать.";
+"resetpasswordcontroller.passwordnewdescriptionlabel"   = "Введите новый пароль";
+"resetpasswordcontroller.passwordolddescriptionlabel"   = "Введите текущий пароль";
+"resetpasswordcontroller.passwordplaceholder"           = "Текущий пароль";
+"resetpasswordcontroller.passwordnewplaceholder"        = "Придумайте новый пароль";
+"resetpasswordcontroller.repeatpasswordplaceholder"     = "Новый пароль еще раз";
+
+
+//EnterPhoneViewController
+"enterphonecontroller.title"                            = "Введите телефон";
+"enterphonecontroller.titlewhenchange"                  = "Изменить номер";
+"enterphonecontroller.titlewhenreset"                   = "Забыл пароль";
+"enterphonecontroller.titlelabel"                       = "Телефон";
+"enterphonecontroller.titlelabelnew"                    = "Новый номер телефона";
+"enterphonecontroller.descriptionlabelreset"            = "Номер телефона, с которого вы зарегистрировались.";
+"enterphonecontroller.phoneplaceholder"                 = "Ваш номер телефона";
+"enterphonecontroller.passwordlabel"                    = "Пароль";
+"enterphonecontroller.licenceagreement"                 = "Пользовательское соглашение";
+"enterphonecontroller.descriptionlabel"                 = "На указанный номер придет СМС с кодом подтверждения.\nМы НИКОМУ не предоставим ваш номер телефона.";
+"enterphonecontroller.restoreavailable"                 = "Данный аккаунт был помечен к удалению. Хотите восстановить его?";
+
+
+//PhoneConfirmationViewController
+"phoneconfirmationcontroller.title"                     = "Введите код";
+"phoneconfirmationcontroller.codeplaceholder"           = "Введите код";
+"phoneconfirmationcontroller.descriptionlabel"          = "Мы выслали сообщение с кодом на ваш номер телефона.";
+"phoneconfirmationcontroller.sendbutton"                = "Выслать код ещё раз";
+"phoneconfirmationcontroller.sendagainlabelformat"      = "Запросить код повторно можно через %.2d:%.2d";
+
+// EnterPassViewController
+"enterpasscontroller.title"                             = "Удалить аккаунт";
+"enterpasscontroller.titlelabel"                        = "Пароль";
+"enterpasscontroller.descriptionlabel"                  = "Введите пароль для подтверждения удаления";
+
+//LicenceAgreementViewController
+"licenceagreementcontroller.title"                      = "Пользовательское соглашение";
+"licenceagreementcontroller.acceptbutton"               = "Согласен";
+"licenceagreementcontroller.declinebutton"              = "Не согласен";
+"licenceagreementcontroller.licenceurl"                 = "%@/api/license?lang=ru";
+
+//RegisterController
+"registercontroller.title"                              = "Регистрация";
+"registercontroller.headertitlelabel"                   = "Завершение регистрации";
+"registercontroller.footerphotobutton"                  = "Фото";
+"registercontroller.footerbirthdayplaceholder"          = "Дата рождения";
+"registercontroller.footergenderplaceholder"            = "Пол";
+"registercontroller.footercityplaceholder"              = "Город проживания";
+"registercontroller.emailplaceholder"                   = "Эл.почта";
+"registercontroller.emaildetails"                       = "Только для новостей. Без спама.";
+"registercontroller.nameplaceholder"                    = "Имя и Фамилия";
+"registercontroller.namedetails"                        = "Пожалуйста, введите реальные личные данные.";
+"registercontroller.passwordplaceholder"                = "Пароль";
+"registercontroller.passworddetails"                    = "Пароль, в котором есть и буквы, и цифры, сложнее взломать.";
+
+//MenuController
+"menucontroller.feedtitle"                              = "Лента";
+"menucontroller.categoriestitle"                        = "Обсуждения";
+"menucontroller.messagestitle"                          = "Сообщения";
+"menucontroller.notificationstitle"                     = "Уведомления";
+"menucontroller.contactstitle"                          = "Контакты";
+"menucontroller.favoritestitle"                         = "Избранное";
+"menucontroller.settingstitle"                          = "Настройки";
+"menucontroller.urgenttitle"                            = "Срочные вызовы";
+"menucontroller.rateapptitle"                           = "Оценить \"YOL\"";
+"menucontroller.feedbacktitle"                          = "Оставить отзыв";
+"menucontroller.shatetitle"                             = "Рассказать другу";
+
+//Profile
+"profilecontroller.title"                               = "Профиль";
+"profilecontroller.mytitle"                             = "Мой профиль";
+"profilecontroller.postscell"                           = "Посмотреть посты";
+"profilecontroller.writemessagecell"                    = "Написать сообщение";
+"profilecontroller.addcontactcell"                      = "Добавить в контакты";
+"profilecontroller.deletecontactcell"                   = "Удалить из контактов";
+"profilecontroller.mypostscell"                         = "Мои посты";
+"profilecontroller.banusercell"                         = "Заблокировать пользователя";
+"profilecontroller.unbanusercell"                       = "Разблокировать пользователя";
+"profilecontroller.banuserask"                          = "Вы уверены, что хотите заблокировать пользользователя %@?";
+"profilecontroller.unbanuserask"                        = "Разблокировать пользователя %@?";
+"profilecontroller.complaincell"                        = "Пожаловаться";
+"profilecontroller.addcarcell"                          = "Добавить транспортное средство";
+"profilecontroller.caractionedit"                       = "Изменить";
+"profilecontroller.caractiondelete"                     = "Удалить";
+"profilecontroller.imagecrop.moveandscale"              = "Изменить";
+"profilecontroller.caractiondeletetitle"                = "Удалить транспортное средство %@?";
+"profilecontroller.profilehidden"                       = "Информация скрыта";
+"profilecontroller.gendererror"                         = "Чтобы изменить значение параметра \"Пол\", обратитесь в техподдержку.";
+"profilecontroller.userremovedaccount"                  = "Пользователь удалил свой аккаунт";
+
+
+//CarAddController
+"caraddcontroller.title"                                = "Добавить трансп...";
+"caraddcontroller.edittitle"                            = "Редактировать";
+"caraddcontroller.parameterplaceholder"                 = "Не выбрано";
+"caraddcontroller.parameterssectiontitle"               = "Основные параметры";
+"caraddcontroller.photossectiontitle"                   = "Фото";
+"caraddcontroller.numbersectiontitle"                   = "Номер";
+"caraddcontroller.parametertypetitle"                   = "Тип транспорта";
+"caraddcontroller.parametermarktitle"                   = "Марка";
+"caraddcontroller.parametermodeltitle"                  = "Модель";
+"caraddcontroller.parameterbodytitle"                   = "Тип кузова";
+"caraddcontroller.parameteryeartitle"                   = "Год выпуска";
+"caraddcontroller.parametercolortitle"                  = "Цвет";
+"caraddcontroller.photorowtitle"                        = "Выберите фото";
+"caraddcontroller.numberrowtitle"                       = "Тип номера";
+"caraddcontroller.numberrowvalue"                       = "Номер";
+"caraddcontroller.numbertypeprivate"                    = "Частный";
+"caraddcontroller.numbertypecitizen"                    = "Для иностранных граждан";
+"caraddcontroller.numbertypemoto"                       = "Мототранспорт";
+
+//ProfileEditController
+"profileeditcontroller.title"                           = "Профиль";
+"profileeditcontroller.avatareditbutton"                = "Правка";
+"profileeditcontroller.nameplaceholder"                 = "Имя";
+"profileeditcontroller.surnameplaceholder"              = "Фамилия";
+"profileeditcontroller.genderplaceholder"               = "Пол";
+"profileeditcontroller.birthdateplaceholder"            = "Дата рождения";
+"profileeditcontroller.cityplaceholder"                 = "Город";
+"profileeditcontroller.emailplaceholder"                = "Email";
+"profileeditcontroller.passwordplaceholder"             = "Пароль";
+"profileeditcontroller.aboutcellplaceholder"            = "Кратко о себе";
+"profileeditcontroller.editphonecelltitle"              = "изменить номер телефона";
+"profileeditcontroller.confirmpasswordmessage"          = "Введите новый email";
+"profileeditcontroller.emailplaceholder"                = "Введите email";
+
+//ImagePickerController
+"groupcontroller.title"                                 = "Альбомы";
+"groupcontroller.camerabutton"                          = "Камера";
+"pickercontroller.countlabelformatwithoutmax"           = "%@";
+"pickercontroller.countlabelformat"                     = "%@ из %@";
+"pickercontroller.loaderimageerrortext"                 = "Ошибка\nзагрузки";
+
+//AddPhoneController
+"addphonecontroller.title"                              = "Добавить телефон";
+"addphonecontroller.titlelabel"                         = "Регистрация";
+"addphonecontroller.descriptionlabel"                   = "Номер телефона следует указать в международном формате — с кодом страны и оператора.";
+"addphonecontroller.phoneplaceholder"                   = "Введите номер телефона";
+
+"addphonecontroller.titlestep2"                         = "Добавить телефон";
+"addphonecontroller.titlelabelstep2"                    = "Регистрация";
+"addphonecontroller.descriptionlabelstep2"              = "Мы выслали сообщение с кодом на Ваш номер телефона.";
+"addphonecontroller.phoneplaceholderstep2"              = "Введите проверочный код";
+"addphonecontroller.notreceivebutton"                   = "Не пришло смс?";
+"addphonecontroller.sendagainbutton"                    = "Выслать код ещё раз";
+
+//PostsListViewController
+"postslistcontroller.feedtitle"                         = "Лента";
+"postslistcontroller.favoritestitle"                    = "Избранное";
+"postslistcontroller.subscribeactiontitle"              = "Подписаться на рубрику";
+"postslistcontroller.unsubscribeactiontitle"            = "Отписаться от рубрики";
+"postslistcontroller.complainactiontitle"               = "Пожаловаться";
+"postslistcontroller.editactiontitle"                   = "Редактировать";
+"postslistcontroller.wholikes"                          = "Оценили";
+"postslistcontroller.deleteactiontitle"                 = "Удалить";
+"postslistcontroller.copypost"                          = "Скопировать";
+"postslistcontroller.readmoretitle"                     = "...читать дальше";
+"postslistcontroller.addfavoritesactiontitle"           = "Добавить в избранное";
+"postslistcontroller.removefavoritesactiontitle"        = "Удалить из избранного";
+"postslistcontroller.nopostforperson"                   = "У этого пользователя нет постов";
+"postslistcontroller.nopost"                            = "Нет постов";
+"postslistcontroller.my"                                = "Мои посты";
+
+//CategoriesListViewController
+"categorieslistcontroller.feedtitle"                    = "Настройки ленты";
+"categorieslistcontroller.searchplaceholder"            = "Поиск по всем постам";
+"categorieslistcontroller.menutitle"                    = "Обсуждения";
+"categorieslistcontroller.parametersformat"             = "%@  Постов: %@  Комментариев: %@";
+
+//PostDetailsViewController
+"postdetailscontroller.title"                           = "Пост";
+"postdetailscontroller.sendbutton"                      = "Отпр.";
+"postdetailscontroller.messageplaceholder"              = "Сообщение";
+"postdetailscontroller.commentscountformat"             = "%@ комментариев из %@";
+"postdetailscontroller.loadmoreformat"                  = "Показать еще %@";
+"postdetailscontroller.complainactiontitle"             = "Пожаловаться";
+"postdetailscontroller.commentcopyactiontitle"          = "Копировать";
+"postdetailscontroller.commenteditactiontitle"          = "Редактировать";
+"postdetailscontroller.commentdeleteactiontitle"        = "Удалить";
+"postdetailscontroller.commentwriteprivatemessage"      = "Личное сообщение";
+"postdetailscontroller.addfavoritesactiontitle"         = "Добавить в избранное";
+"postdetailscontroller.removefavoritesactiontitle"      = "Удалить в избранного";
+"postdetailscontroller.textareaplaceholder"             = "Ваш комментарий";
+
+
+//PostCreateViewController
+"postcreatecontroller.edittitle"                        = "Редактировать";
+"postcreatecontroller.addtitle"                         = "Новый пост";
+"postcreatecontroller.cartitle"                         = "Авто";
+"postcreatecontroller.locationtitle"                    = "Местоположение";
+"postcreatecontroller.carnumbertitle"                   = "Хотите указать номер?";
+"postcreatecontroller.nocarserrormessage"               = "У вас нет добавленных авто";
+
+//Messages Attachments
+"postcreatecontroller.attach.image"                     = "Изображение";
+"postcreatecontroller.attach.location"                  = "Местоположение";
+"postcreatecontroller.attach.contact"                   = "Контакт";
+"postcreatecontroller.attach.car"                       = "Транспортное средство";
+
+//MapViewController
+"mapcontroller.title"                                   = "Местоположение";
+"mapcontroller.edittitle"                               = "Выберите место";
+
+//CommentViewController
+"commentcontroller.edittitle"                           = "Редактировать";
+
+//DialogsViewController
+"dialogscontroller.title"                               = "Сообщения";
+"dialogscontroller.nomessages"                          = "Нет сообщений";
+"dialogscontroller.additionaltext"                      = "Тут будут показаны последние переписки с пользователями.";
+"dialogscontroller.caradditionaltext"                   = "Сообщения по номеру транспортного средства предназначены только для знакомств. Использование их в любых других целях запрещено правилами пользования сервисом и влечет за собой бессрочное блокирование аккаунта. Данная функция отключена по умолчанию. Чтобы принимать и отправлять сообщения по номеру транспорта, включите функцию в настройках приложения.";
+"dialogscontroller.persons"                             = "ПО ПРОФИЛЮ";
+"dialogscontroller.cars"                                = "ПО НОМЕРУ";
+"dialogscontroller.carchatsdisabledmessage"             = "Чтобы отправлять и получать личные сообщения по номеру авто, включите данную опцию в Настройках";
+"dialogscontroller.settingsbutton"                      = "Настройки";
+"dialogscontroller.searchplaceholder"                   = "Поиск по всем сообщениям";
+
+//ContactListViewController
+"contactlistcontroller.title"                           = "Контакты";
+"contactlistcontroller.dialogtitle"                     = "Новое сообщение";
+"contactlistcontroller.wholikes"                        = "Оценили";
+"contactlistcontroller.blacklist"                       = "Заблокированные";
+"contactlistcontroller.nousers"                         = "Нет контактов";
+"contactlistcontroller.nowholikes"                      = "Нет оценивших";
+"contactlistcontroller.emptyblacklist"                  = "Список пуст";
+"contactlistcontroller.searchplaceholder"               = "Поиск контактов";
+"contactsearchcontroller.title"                         = "Поиск пользователей";
+"contactsearchcontroller.searchplaceholder"             = "Введите id пользователя";
+"contactsearchcontroller.noresult"                      = "Пользователь с таким id не найден";
+
+
+// MessagesViewController
+"messagesviewcontroller.lastmessagestatus.read"         = "Прочитано";
+"messagesviewcontroller.lastmessagestatus.delivered"    = "Доставлено";
+"messagesviewcontroller.lastmessagestatus.sent"         = "Отправлено";
+"messagesviewcontroller.textareaplaceholder"            = "Сообщение";
+"messagesviewcontroller.sendbutton"                     = "Отпр.";
+
+//UrgentMessagesViewController
+"urgentmessagescontroller.title"                = "Срочные вызовы";
+"urgentmessagescontroller.nomessages"           = "Нет срочных вызовов";
+"urgentmessagescontroller.additionaltext"       = "Данная функция предназначена для экстренной связи с владельцем или водителем припаркованной машины, если последняя мешает выезду или проезду других машин, эвакуируется дорожной полицией или в других срочных случаях. Использование данной функции с любой другой целью запрещено правилами пользования сервисом и влечет за собой блокирование аккаунта. \n\n Наберите номер нужной машины и нажмите \"Отправить\". Адресат получит текстовое сообщение с просьбой подойти к машине и номером вашего телефона.";
+//"messagesviewcontroller.lastmessagestatus.read"         = "Прочитано";
+//"messagesviewcontroller.lastmessagestatus.delivered"    = "Доставлено";
+
+
+"urgentmessagescontroller.fromme"               = "Вы отправили срочный вызов по номеру %@";
+"urgentmessagescontroller.notdelivered"         = "отправлено";
+"urgentmessagescontroller.deliveredat"          = "доставлено %@";
+"urgentmessagescontroller.deliveredbysmsat"     = "доставлено по SMS";
+"urgentmessagescontroller.tome"                 = "%@ просит подойти к машине\n%@";
+"urgentmessagescontroller.complaintmessage"     = "Вы уверены, что имело место злоупотребление?";
+"urgentmessagescontroller.complaintdelivered"   = "Жалоба отправлена";
+"urgentmessagescontroller.complainactiontitle"  = "Пожаловаться";
+"urgentmessagescontroller.textareaplaceholder"  = "Номер машины";
+
+//SettingsViewController
+"settingscontroller.title"              = "Настройки";
+"settingscontroller.clearcachemessage"  = "Вы действительно хотите очистить кеш приложения?";
+"settingscontroller.confirmexitmessage" = "Вы действительно хотите выйти из аккаунта?";
+//CarAddViewController
+"caraddviewcontroller.onlybysupportmessage" = "Номера с сериями %@ резервируются для пользователя службой поддержки только при подтверждении факта владения или пользования данной машиной. Пожалуйста, отправьте сканированную копию или фото техпаспорта по адресу support@yolservice.com и укажите в письме ваш ID пользователя.";
+"caraddviewcontroller.notallowedmessage"    = "Данный номер не существует";
+
+"settings.profile.header"                = "Показывать в моем профиле";
+"settings.profile.phone"                 = "Номер телефона";
+"settings.profile.email"                 = "Электронная почта";
+"settings.profile.carnumber"             = "Номера ТС";
+"settings.profile.hint"                  = "Настройка отображения телефона, электронной почты и номеров автомобилей для других пользователей.";
+
+"settings.profile.locklist"             = "Заблокированные пользователи";
+
+"settings.loadimages.header"             = "Загрузка изображений";
+"settings.loadimages.wifi"               = "Только по Wi-Fi";
+
+"settings.push.header"                   = "Push-оповещения";
+"settings.push.enable"                   = "Включить оповещения";
+"settings.push.sound"                    = "Звук";
+"settings.push.vibration"                = "Вибрация";
+"settings.push.led"                      = "LED-вспышка";
+"settings.push.selecttitle"              = "O чём оповещать?";
+"settings.push.selectdetail"             = "Личные сообщения, комментарии, оценки постов";
+
+"settings.notifications.header"          = "ОПОВЕЩЕНИЯ В ОТКРЫТОМ ПРИЛОЖЕНИИ";
+"settings.notifications.enable"          = "Включить уведомления";
+"settings.notifications.hint"            = "Показывать уведомления при открытом приложении";
+"settings.notiftype.messages"            = "Личные сообщения";
+"settings.notiftype.comments"            = "Комментарии к моим постам";
+"settings.notiftype.likespost"           = "Оценки моих постов";
+"settings.notiftype.likescomments"       = "Оценки моих комментариев";
+"settings.notiftype.watchedposts"        = "Комментарии к чужим постам, которые я комментировал";
+
+"settings.messages.header"               = "Личные сообщения";
+"settings.messages.showstart"            = "Показывать начало сообщения";
+"settings.messages.hint"                 = "В Push-оповещениях и уведомлениях показывать начало сообщения";
+
+"settings.carchats.enable"               = "Сообщения по номеру ТС";
+"settings.carchats.hint"                 = "Включив данную функцию, вы сможете отправлять и получать личные сообщения по номеру транспортного средства";
+
+"settings.main.language"                 = "Язык приложения";
+//"settings.main.languagechanget"          = "Язык приложения сменится после перезапуска приложения";
+"settings.main.languagechanges"          = "Для смены языка интерфейса необходимо подключение к Интернету";
+"settings.main.password"                 = "Изменить пароль";
+"settings.main.support"                  = "Обратиться в техподдержку";
+"settings.main.supportSubject"           = "Вопрос по приложению YOL на iOS user_id = %d версия %@";
+"settings.main.clear"                    = "Очистить кеш";
+"settings.main.exit"                     = "Выйти";
+"settings.main.removeaccount"            = "Удалить аккаунт";
+"settings.main.removeaccountalert"       = "Вы действительно хотите удалить свой аккаунт?";
+
+"settings.language.rus"                 = "Русский";
+"settings.language.eng"                 = "English";
+"settings.language.az"                  = "Azərbaycan";
+
+"settings.about.text"                   = "Сделано с любовью в лаборатории KODE\nwww.appkode.ru";
+"settings.about.version"                = "Версия %@";
+
+
+
+//States
+"states.post.liked.single"                              = "оценил ваш";
+"states.post.liked.count"                               = "оценили ваш" ;
+"states.liked.post"                                     = "пост";
+"states.liked.comment"                                  = "комментарий";
+"states.post.commented.single"                          = "прокомментировал ваш";
+"states.post.commented.count"                           = "прокомментировали ваш";
+"states.commentedpost.commented.single"                 = "прокомментировал";
+"states.commentedpost.commented.count"                  = "прокомментировали";
+"states.common.notified.begin"                          = "У вас";
+
+"states.common.user0"                                   = "пользователей";
+"states.common.user1"                                   = "пользователь";
+"states.common.user5"                                   = "пользователя";
+"states.common.userother"                               = "пользователей";
+"states.dialog.image"                                   = "[Изображение]";
+
+"states.common.urgent1"                                 = "У вас %@ новый срочный вызов";
+"states.common.urgent2"                                 = "У вас %@ новых срочных вызова";
+"states.common.urgentmany"                              = "У вас %@ новых срочных вызовов";
+
+"states.common.newnotification1"                        = "У вас %@ новое уведомление";
+"states.common.newnotification2"                        = "У вас %@ новых уведомления";
+"states.common.newnotificationmany"                     = "У вас %@ новых уведомлений";
+
+"states.comment.liked.by"                               = "оценил(а) ваш комментарий к посту";
+"states.comment.liked.user1"                            = "оценил ваш комментарий к посту";
+"states.comment.liked.user5"                            = "оценили ваш комментарий к посту";
+"states.comment.liked.userother"                        = "оценили ваш комментарий к посту";
+
+"states.post.liked.by"                                  = "оценил(а) ваш пост";
+"states.post.liked.user1"                               = "оценил ваш пост";
+"states.post.liked.user5"                               = "оценили ваш пост";
+"states.post.liked.userother"                           = "оценили ваш пост";
+
+"states.post.commented.your.by"                         = "прокомментировал(а) ваш пост";
+"states.post.commented.your.user1"                      = "прокомментировал ваш пост";
+"states.post.commented.your.user5"                      = "прокомментировали ваш пост";
+"states.post.commented.your.userother"                  = "прокомментировали ваш пост";
+
+"states.post.commented.other.by"                        = "прокомментировал(а) пост";
+"states.post.commented.other.user1"                     = "прокомментировал пост";
+"states.post.commented.other.user5"                     = "прокомментировали пост";
+"states.post.commented.other.userother"                 = "прокомментировали пост";
+
+"state.message.received"                                = "прислал(а) вам личное сообщение";
+
+
+//Notification
+"notificationlistcontroller.feedtitle"                  = "Уведомления";
+"notificationlistcontroller.nonotification"             = "Нет уведомлений";
+"notificationlistcontroller.additionaltext"             = "Тут будут показаны новые оценки и комментарии к постам, в которых вы проявили активность.";
+
+"notif.post.commented.your.user1"                       = "Новый комментарий к вашему посту";
+"notif.post.commented.your.user5"                       = "%@ новых комментария к вашему посту";
+"notif.post.commented.your.userother"                   = "%@ новых комментариев к вашему посту";
+
+"notif.post.commented.other.user1"                      = "Новый комментарий к посту";
+"notif.post.commented.other.user5"                      = "%@ новых комментария к посту";
+"notif.post.commented.other.userother"                  = "%@ новых комментариев к посту";
+
+"notif.commentedmore.begin"                             = "...и ещё";
+"notif.commentedmore.count0"                            = "комментариев";
+"notif.commentedmore.count1"                            = "комментарий";
+"notif.commentedmore.count5"                            = "комментария";
+"notif.commentedmore.countother"                        = "комментариев";
+
+//Attachments
+"states.attach.send"                                    = "прислал";
+"states.attach.i.image"                                 = "изображение";
+"states.attach.i.location"                              = "местоположение";
+"states.attach.i.car"                                   = "машина";
+"states.attach.i.something"                             = "что-то";
+
+"states.attach.r.image"                                 = "изображение";
+"states.attach.r.location"                              = "местоположение";
+"states.attach.r.car"                                   = "машину";
+"states.attach.r.something"                             = "что-то";
+
+
+//Complaints Type
+"complaint.type.mismatch"                               = "Несоответствие тематике";
+"complaint.type.spam"                                   = "Реклама или спам";
+"complaint.type.flood"                                  = "Словесный мусор";
+"complaint.type.rude"                                   = "Грубое поведение";
+"complaint.type.obscene"                                = "Непристойное поведение";
+
+//Time
+"yoltimeago.justnow"                                    = "Только что";//"Just now";
+"yoltimeago.secondsago"                                 = "%%d секунд назад";//"%%d %@seconds ago";
+"yoltimeago.minuteago"                                  = "Минуту назад";//""%%d %@minutes ago";
+"yoltimeago.minutesago"                                 = "%%d минуты назад";//"%%d %@minutes ago";
+"yoltimeago.minutes5ago"                                = "%%d минут назад";//"%%d %@minutes ago";
+"yoltimeago.hourago"                                    = "Час назад"; //"An hour ago"
+"yoltimeago.hoursago"                                   = "%%d часа назад";//"%%d %@hours ago"
+"yoltimeago.in"                                         = "%@ в %@";//"%@ in %@"
+"yoltimeago.today"                                      = "Сегодня";//"Today"
+"yoltimeago.yesterday"                                  = "Вчера";//"Yesterday"
