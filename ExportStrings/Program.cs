@@ -24,7 +24,7 @@ namespace ExportStrings
 
             try
             {
-                var loc = new LocFile(System.IO.Path.Combine(approot, args[0]));
+                var loc = new LocFileParser(System.IO.Path.Combine(approot, args[0]));
 
                 StreamWriter csv = new StreamWriter(System.IO.Path.Combine(approot, args[1]));
                 CSV.Write(csv, loc.localizationPairs.Select(x => new List<string>(new string[] { x.Key, x.Value })).ToList());

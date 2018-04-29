@@ -8,7 +8,7 @@ using System.IO;
 
 namespace StringsCore
 {
-    enum LocFileParserState
+    enum ParserState
     {
         WaitingKey,
         InKey,
@@ -25,7 +25,7 @@ namespace StringsCore
         SyntaxError
     }
 
-    enum LocFileParserStringSubstate
+    enum ParserStringSubstate
     {
         None,
         WaitingEscapeCode,
@@ -36,15 +36,145 @@ namespace StringsCore
     }
 
 
-    public class LocFile
+    public class LocEntry
     {
-        List<Block> blocks;
+        public enum EntryType
+        {
+            Text,
+            BlockComment,
+            LineComment,
+            LocPair
+        }
+    }
+
+    public class LocTextEntry : LocEntry
+    { 
+        public string text;
+
+        public LocTextEntry(string text)
+        {
+            this.text = text;
+        }
+    }
+
+    public class LocTreeEntry : LocEntry
+    {
+        public List<LocEntry> entries = new List<LocEntry>();
+        public void Append(LocEntry entry)
+        {
+            entries.Add(entry);
+        }
+    }
+
+    public class TextBlock : LocTextEntry
+    {
+        public TextBlock(string text) : base(text) { }
+
+        public override string ToString()
+        {
+            return String.Format("t: {0}", text);
+        }
+    }
+
+    public class BlockCommentBlock : LocTextEntry
+    {
+        public BlockCommentBlock(string text) : base(text) { }
+
+        public override string ToString()
+        {
+            return String.Format("bc: {0}", text);
+        }
+    }
+
+    public class LineCommentBlock : LocTextEntry
+    {
+        public LineCommentBlock(string text) : base(text) { }
+
+        public override string ToString()
+        {
+            return string.Format("lc: {0}", text);
+        }
+    }
+
+    public class SeparatorBlock : LocTextEntry
+    {
+        public SeparatorBlock() : base("=") { }
+
+        public override string ToString()
+        {
+            return "=";
+        }
+    }
+
+    public class SemicolonBlock : LocTextEntry
+    {
+        public SemicolonBlock() : base(";") { }
+
+        public override string ToString()
+        {
+            return "\"; \"";
+        }
+    }
+
+    public class LocPairBlock : LocTreeEntry
+    {
+        public LocPairBlock()
+        {
+
+        }
+
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder("kv: ");
+            foreach (LocEntry entry in entries)
+            {
+                sb.Append(entry.ToString());
+                sb.Append("; ");
+            }
+
+            return sb.ToString();
+        }
+    }
+
+    public class KeyBlock : LocTextEntry
+    {
+        public KeyBlock(string text) : base(text) { }
+
+        public override string ToString()
+        {
+            return string.Format("kb: {0}", text);
+        }
+    }
+
+    public class ValueBlock: LocTextEntry
+    {
+        public ValueBlock(string text) : base(text) { }
+
+        public override string ToString()
+        {
+            return string.Format("vb: {0}", text);
+        }
+    }
+
+    public class LocFile : LocTreeEntry
+    {
+
+    }
+
+    public class LocFileParser
+    {
+
+        LocFile document = null;
+        private Stack<LocTreeEntry> docStack = null;
 
         public List<KeyValuePair<string, string>> localizationPairs = new List<KeyValuePair<string, string>>();
         string currentKey = null;
         string currentValue = null;
 
-        public LocFile(string path)
+        StringBuilder currentText = new StringBuilder();
+        StringBuilder currentComment = new StringBuilder();
+
+        public LocFileParser(string path)
         {
             TextReader locReader = new StreamReader(path);
 
@@ -53,14 +183,28 @@ namespace StringsCore
             locReader.Close();
         }
 
-        private LocFileParserState parserState;
-        private LocFileParserStringSubstate stringSubstate;
-        private Stack<LocFileParserState> statesStack;
+        private ParserState parserState;
+        private ParserStringSubstate stringSubstate;
+        private Stack<ParserState> statesStack;
+
+        /*
+        private void appendBlockIfNeeded(LocEntry.EntryType type, String text)
+        {
+            if (text)
+        }
+        */
 
         private void Parse(TextReader reader)
         {
-            parserState = LocFileParserState.WaitingKey;
-            statesStack = new Stack<LocFileParserState>();
+            document = new LocFile();
+            docStack = new Stack<LocTreeEntry>();
+            docStack.Push(document);
+
+            parserState = ParserState.WaitingKey;
+            statesStack = new Stack<ParserState>();
+            
+
+
             int position = 1;
             int line = 1;
 
@@ -79,48 +223,47 @@ namespace StringsCore
 
                 switch (parserState)
                 {
-                    case LocFileParserState.WaitingKey:
+                    case ParserState.WaitingKey:
                         this.ProcessWaitingKey((char)rawChar);
                         break;
-                    case LocFileParserState.InKey:
+                    case ParserState.InKey:
                         this.ProcessInKey((char)rawChar);
                         break;
 
-                    case LocFileParserState.WaitingSeparator:
+                    case ParserState.WaitingSeparator:
                         this.ProcessWaitingSeparator((char)rawChar);
                         break;
 
-                    case LocFileParserState.WaitingValue:
+                    case ParserState.WaitingValue:
                         this.ProcessWaitingValue((char)rawChar);
                         break;
-                    case LocFileParserState.InValue:
+                    case ParserState.InValue:
                         this.ProcessInValue((char)rawChar);
                         break;
 
-                    case LocFileParserState.WaitingSemicolon:
+                    case ParserState.WaitingSemicolon:
                         this.ProcessWaitingSemicolon((char)rawChar);
                         break;
 
-                    case LocFileParserState.WaitingComment:
+                    case ParserState.WaitingComment:
                         this.ProcessWaitingComment((char)rawChar);
                         break;
-                    case LocFileParserState.LineComment:
+                    case ParserState.LineComment:
                         this.ProcessLineComment((char)rawChar);
                         break;
-                    case LocFileParserState.BlockComment:
+                    case ParserState.BlockComment:
                         this.ProcessBlockComment((char)rawChar);
                         break;
-                    case LocFileParserState.WaitingQuitBlockComment:
-                        this.ProcessWaitingQuitBlockComment((char)rawChar);
+                    case ParserState.WaitingQuitBlockComment:
+                        this.ProcessWaitingQuitBlockComment((char)rawChar); // +
                         break;
                     default:
                         {
                             return; // oops
                         }
-                        break;
                 }
 
-                if (parserState == LocFileParserState.SyntaxError)
+                if (parserState == ParserState.SyntaxError)
                 {
                     throw new Exception(string.Format("syntax error at line {0}, position {1}", line, position));
                 }
@@ -128,8 +271,8 @@ namespace StringsCore
                 rawChar = reader.Read();
             }
 
-            if (!(parserState == LocFileParserState.WaitingKey) && 
-                !((parserState == LocFileParserState.LineComment) && (statesStack.Peek() == LocFileParserState.WaitingKey)))
+            if (!(parserState == ParserState.WaitingKey) && 
+                !((parserState == ParserState.LineComment) && (statesStack.Peek() == ParserState.WaitingKey)))
             {
                 return; //oops
             }
@@ -141,13 +284,15 @@ namespace StringsCore
             {
                 case '/':
                     {
+                        AppendTextBlockIfNeeded();
                         this.statesStack.Push(this.parserState);
-                        this.parserState = LocFileParserState.WaitingComment;
+                        this.parserState = ParserState.WaitingComment;
                     }
                     break;
                 case '\"':
                     {
-                        this.parserState = LocFileParserState.InValue;
+                        AppendTextBlockIfNeeded();
+                        this.parserState = ParserState.InValue;
                         this.InitReadString();
                     }
                     break;
@@ -155,11 +300,12 @@ namespace StringsCore
                     {
                         if (char.IsWhiteSpace(rawChar))
                         {
-                            this.parserState = LocFileParserState.WaitingValue;
+                            this.currentText.Append(rawChar);
+                            this.parserState = ParserState.WaitingValue;
                         }
                         else
                         {
-                            this.parserState = LocFileParserState.SyntaxError;
+                            this.parserState = ParserState.SyntaxError;
                         }
                     }
                     break;
@@ -172,24 +318,28 @@ namespace StringsCore
             {
                 case '/':
                     {
+                        AppendTextBlockIfNeeded();
                         this.statesStack.Push(this.parserState);
-                        this.parserState = LocFileParserState.WaitingComment;
+                        this.parserState = ParserState.WaitingComment;
                     }
                     break;
                 case '=':
                     {
-                        this.parserState = LocFileParserState.WaitingValue;
+                        AppendTextBlockIfNeeded();
+                        docStack.Peek().Append(new SeparatorBlock());
+                        this.parserState = ParserState.WaitingValue;
                     }
                     break;
                 default:
                     {
                         if (char.IsWhiteSpace(rawChar))
                         {
-                            this.parserState = LocFileParserState.WaitingSeparator;
+                            this.parserState = ParserState.WaitingSeparator;
+                            this.currentText.Append(rawChar);
                         }
                         else
                         {
-                            this.parserState = LocFileParserState.SyntaxError;
+                            this.parserState = ParserState.SyntaxError;
                         }
                     }
                     break;
@@ -203,24 +353,28 @@ namespace StringsCore
                 case '/':
                     {
                         this.statesStack.Push(this.parserState);
-                        this.parserState = LocFileParserState.WaitingComment;
+                        this.parserState = ParserState.WaitingComment;
                     }
                     break;
                 case ';':
                     {
                         localizationPairs.Add(new KeyValuePair<string, string>(currentKey, currentValue));
-                        this.parserState = LocFileParserState.WaitingKey;
+                        AppendTextBlockIfNeeded();
+                        docStack.Peek().Append(new SemicolonBlock());
+                        docStack.Pop();
+                        this.parserState = ParserState.WaitingKey;
                     }
                     break;
                 default:
                     {
                         if (char.IsWhiteSpace(rawChar))
                         {
-                            this.parserState = LocFileParserState.WaitingSemicolon;
+                            this.parserState = ParserState.WaitingSemicolon;
+                            this.currentText.Append(rawChar);
                         }
                         else
                         {
-                            this.parserState = LocFileParserState.SyntaxError;
+                            this.parserState = ParserState.SyntaxError;
                         }
                     }
                     break;
@@ -233,39 +387,56 @@ namespace StringsCore
             {
                 case '/':
                     {
+                        AppendTextBlockIfNeeded();
                         this.statesStack.Push(this.parserState);
-                        this.parserState = LocFileParserState.WaitingComment;
+                        this.parserState = ParserState.WaitingComment;
                     }
                     break;
                 case '\"':
                     {
-                        this.parserState = LocFileParserState.InKey;
+                        AppendTextBlockIfNeeded();
+                        this.parserState = ParserState.InKey;
                         this.InitReadString();
+                        LocTreeEntry pair = new LocPairBlock();
+                        docStack.Peek().Append(pair);
+                        docStack.Push(pair);
                     }
                     break;
                 case ';':
                     {
-                        this.parserState = LocFileParserState.WaitingKey;
+                        AppendTextBlockIfNeeded();
+                        docStack.Peek().Append(new SemicolonBlock());
+                        this.parserState = ParserState.WaitingKey;
                     }
                     break;
                 default:
                     {
                         if (char.IsWhiteSpace(rawChar))
                         {
-                            this.parserState = LocFileParserState.WaitingKey;
+                            this.parserState = ParserState.WaitingKey;
+                            this.currentText.Append(rawChar);
                         }
                         else
                         {
-                            this.parserState = LocFileParserState.SyntaxError;
+                            this.parserState = ParserState.SyntaxError;
                         }
                     }
                     break;
             }
         }
 
+        private void AppendTextBlockIfNeeded()
+        {
+            if (this.currentText.Length > 0)
+            {
+                docStack.Peek().Append(new TextBlock(this.currentText.ToString()));
+                this.currentText = new StringBuilder();
+            }
+        }
+
         private void InitReadString()
         {
-            this.stringSubstate = LocFileParserStringSubstate.None;
+            this.stringSubstate = ParserStringSubstate.None;
             this.currentString = new StringBuilder();
         }
 
@@ -276,16 +447,16 @@ namespace StringsCore
             // postprocess
             switch (stringSubstate)
             {
-                case LocFileParserStringSubstate.Done:
+                case ParserStringSubstate.Done:
                     {
                         currentKey = currentString.ToString();
-                        parserState = LocFileParserState.WaitingSeparator;
-                        // todo
+                        parserState = ParserState.WaitingSeparator;
+                        docStack.Peek().Append(new KeyBlock(currentKey));
                     }
                     break;
-                case LocFileParserStringSubstate.SyntaxError:
+                case ParserStringSubstate.SyntaxError:
                     {
-                        parserState = LocFileParserState.SyntaxError;
+                        parserState = ParserState.SyntaxError;
                     }
                     break;
             }
@@ -298,16 +469,16 @@ namespace StringsCore
             // postprocess
             switch (stringSubstate)
             {
-                case LocFileParserStringSubstate.Done:
+                case ParserStringSubstate.Done:
                     {
                         currentValue = currentString.ToString();
-                        parserState = LocFileParserState.WaitingSemicolon;
-                        // todo
+                        parserState = ParserState.WaitingSemicolon;
+                        docStack.Peek().Append(new ValueBlock(currentValue));
                     }
                     break;
-                case LocFileParserStringSubstate.SyntaxError:
+                case ParserStringSubstate.SyntaxError:
                     {
-                        parserState = LocFileParserState.SyntaxError;
+                        parserState = ParserState.SyntaxError;
                     }
                     break;
             }
@@ -316,17 +487,17 @@ namespace StringsCore
         {
             switch (stringSubstate)
             {
-                case LocFileParserStringSubstate.None:
+                case ParserStringSubstate.None:
                     {
                         this.ProcessStringChar(rawChar);
                     }
                     break;
-                case LocFileParserStringSubstate.WaitingEscapeCode:
+                case ParserStringSubstate.WaitingEscapeCode:
                     {
                         this.ProcessEscapeCode(rawChar);
                     }
                     break;
-                case LocFileParserStringSubstate.UTF8Code:
+                case ParserStringSubstate.UTF8Code:
                     {
                         throw new NotImplementedException();
                     }
@@ -340,36 +511,36 @@ namespace StringsCore
                 case '\\':
                     {
                         currentString.Append('\\');
-                        this.stringSubstate = LocFileParserStringSubstate.None;
+                        this.stringSubstate = ParserStringSubstate.None;
                     }
                     break;
                 case '\"':
                     {
                         currentString.Append('\"');
-                        this.stringSubstate = LocFileParserStringSubstate.None;
+                        this.stringSubstate = ParserStringSubstate.None;
                     }
                     break;
                 case 'r':
                     {
                         currentString.Append('\r');
-                        this.stringSubstate = LocFileParserStringSubstate.None;
+                        this.stringSubstate = ParserStringSubstate.None;
                     }
                     break;
                 case 'n':
                     {
                         currentString.Append('\n');
-                        this.stringSubstate = LocFileParserStringSubstate.None;
+                        this.stringSubstate = ParserStringSubstate.None;
                     }
                     break;
                 case 't':
                     {
                         currentString.Append('\t');
-                        this.stringSubstate = LocFileParserStringSubstate.None;
+                        this.stringSubstate = ParserStringSubstate.None;
                     }
                     break;
                 case 'U':
                     {
-                        this.stringSubstate = LocFileParserStringSubstate.UTF8Code;
+                        this.stringSubstate = ParserStringSubstate.UTF8Code;
                     }
                     break;
                 default:
@@ -386,17 +557,17 @@ namespace StringsCore
             {
                 case '\\':
                     {
-                        this.stringSubstate = LocFileParserStringSubstate.WaitingEscapeCode;
+                        this.stringSubstate = ParserStringSubstate.WaitingEscapeCode;
                     }
                     break;
                 case '\"':
                     {
-                        this.stringSubstate = LocFileParserStringSubstate.Done;
+                        this.stringSubstate = ParserStringSubstate.Done;
                     }
                     break;
                 default:
                     {
-                        this.stringSubstate = LocFileParserStringSubstate.None;
+                        this.stringSubstate = ParserStringSubstate.None;
                         currentString.Append(rawChar);
                     }
                     break;
@@ -409,17 +580,17 @@ namespace StringsCore
             {
                 case '/':
                     {
-                        this.parserState = LocFileParserState.LineComment;
+                        this.parserState = ParserState.LineComment;
                     }
                     break;
                 case '*':
                     {
-                        this.parserState = LocFileParserState.BlockComment;
+                        this.parserState = ParserState.BlockComment;
                     }
                     break;
                 default:
                     {
-                        this.parserState = LocFileParserState.SyntaxError;
+                        this.parserState = ParserState.SyntaxError;
                     }
                     break;
             }
@@ -432,6 +603,13 @@ namespace StringsCore
                 case '\n':
                     {
                         this.parserState = this.statesStack.Pop();
+                        docStack.Peek().Append(new LineCommentBlock(currentComment.ToString()));
+                        currentComment = new StringBuilder();
+                    }
+                    break;
+                default:
+                    {
+                        currentComment.Append(rawChar);
                     }
                     break;
             }
@@ -443,7 +621,12 @@ namespace StringsCore
             {
                 case '*':
                     {
-                        this.parserState = LocFileParserState.WaitingQuitBlockComment;
+                        this.parserState = ParserState.WaitingQuitBlockComment;
+                    }
+                    break;
+                default:
+                    {
+                        currentComment.Append(rawChar);
                     }
                     break;
             }
@@ -456,11 +639,14 @@ namespace StringsCore
                 case '/':
                     {
                         this.parserState = this.statesStack.Pop();
+                        docStack.Peek().Append(new BlockCommentBlock(currentComment.ToString()));
+                        currentComment = new StringBuilder();
                     }
                     break;
                 default:
                     {
-                        this.parserState = LocFileParserState.BlockComment;
+                        this.parserState = ParserState.BlockComment;
+                        currentComment.Append(rawChar);
                     }
                     break;
             }

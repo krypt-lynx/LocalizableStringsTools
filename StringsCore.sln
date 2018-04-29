@@ -10,6 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExportStrings", "ExportStri
 		{4737F693-207D-4F29-83B9-CA710AEB237E} = {4737F693-207D-4F29-83B9-CA710AEB237E}
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestProject", "TestProject\TestProject.csproj", "{019E3696-9689-4920-B60A-EA47C9B2B94C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,6 +26,10 @@ Global
 		{0AF9E660-5742-4843-9399-3156C58389E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0AF9E660-5742-4843-9399-3156C58389E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0AF9E660-5742-4843-9399-3156C58389E4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{019E3696-9689-4920-B60A-EA47C9B2B94C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{019E3696-9689-4920-B60A-EA47C9B2B94C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{019E3696-9689-4920-B60A-EA47C9B2B94C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{019E3696-9689-4920-B60A-EA47C9B2B94C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
