@@ -48,7 +48,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Block.cs" />
-    <Compile Include="LocFile.cs" />
+    <Compile Include="LocFileGenerator.cs" />
+    <Compile Include="LocFileParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SemanticTree.cs" />
   </ItemGroup>

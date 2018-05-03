@@ -35,10 +35,10 @@ namespace StringsCore
         SyntaxError
     }
 
-    public class LocFileParser
+    public class LocFileParser : IDisposable
     {
 
-        LocFile document = null;
+        public LocFile document { get; private set; }
         private Stack<LocTreeEntry> docStack = null;
 
         string currentKey = null;
@@ -47,24 +47,41 @@ namespace StringsCore
         StringBuilder currentText = new StringBuilder();
         StringBuilder currentComment = new StringBuilder();
 
+        TextReader reader = null;
+
         public LocFileParser(string path)
         {
-            TextReader locReader = new StreamReader(path);
+            reader = new StreamReader(path);
+        }
+
+
+        public void Dispose()
+        {
+            reader.Close();
+            reader.Dispose();
+        }
+
+        public LocFile Parse()
+        {
 
             document = new LocFile();
-            this.Parse(locReader);
+            this.ParseInternal(reader);
             document.FinalizeTree();
-            
 
-            locReader.Close();
+            reader.Close();
+
+            return document;
         }
+
+        
 
         private ParserState parserState;
         private ParserStringSubstate stringSubstate;
         private Stack<ParserState> statesStack;
+        private StringBuilder unicodeSequence;
+        private int expectedUnicodeChars;
 
-
-        private void Parse(TextReader reader)
+        private void ParseInternal(TextReader reader)
         {
             docStack = new Stack<LocTreeEntry>();
             docStack.Push(document);
@@ -367,8 +384,39 @@ namespace StringsCore
                     break;
                 case ParserStringSubstate.UTF8Code:
                     {
-                        throw new NotImplementedException();
+                        this.ProcessUnicodeChar(rawChar);                        
                     }
+                    break;
+            }
+        }
+
+        private void ProcessUnicodeChar(char rawChar)
+        {
+            if (Uri.IsHexDigit(rawChar)) // todo: найти метод, расположенный в чуть менее абсурдном месте
+            {
+                unicodeSequence.Append(rawChar);
+                expectedUnicodeChars--;
+            }
+            else
+            {
+                // todo: fallback
+                throw new InvalidDataException(string.Format("Invalid unicode sequence: \\{0}{1} ", unicodeSequence, rawChar));
+            }
+
+            if (expectedUnicodeChars <= 0)
+            {
+                uint ucharcode;
+                if (!uint.TryParse(unicodeSequence.ToString(), System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture, out ucharcode))
+                {
+                    throw new InvalidDataException(string.Format("Invalid unicode sequence: \\{0} ", unicodeSequence));
+                }
+                currentString.Append((char)ucharcode);
+
+                stringSubstate = ParserStringSubstate.None;
+            }
+            else
+            {
+                stringSubstate = ParserStringSubstate.UTF8Code;
             }
         }
 
@@ -409,13 +457,14 @@ namespace StringsCore
                 case 'U':
                     {
                         this.stringSubstate = ParserStringSubstate.UTF8Code;
+                        unicodeSequence = new StringBuilder();
+                        expectedUnicodeChars = 4;
                     }
                     break;
                 default:
                     {
-                        throw new NotImplementedException();
+                        throw new InvalidDataException(string.Format("Unexpected escape code: {0}", rawChar));
                     }
-                    break;
             }
         }
 
@@ -489,6 +538,7 @@ namespace StringsCore
             {
                 case '*':
                     {
+                        AppendTextBlockIfNeeded();
                         this.parserState = ParserState.WaitingQuitBlockComment;
                     }
                     break;

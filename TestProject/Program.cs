@@ -11,7 +11,13 @@ namespace TestProject
         static void Main(string[] args)
         {
             string approot = System.AppDomain.CurrentDomain.BaseDirectory;
-            var test = new LocFileParser(System.IO.Path.Combine(approot, "Localizable.strings"));
+            var parser = new LocFileParser(System.IO.Path.Combine(approot, "Localizable.strings"));
+            var document = parser.Parse();
+
+            var generator = new LocFileGenerator(document);
+            generator.Write(System.IO.Path.Combine(approot, "restored.strings"));
+
+            //test.Save(System.IO.Path.Combine(approot, "Localizable_restored.strings"));
             Console.ReadKey();
         }
     }

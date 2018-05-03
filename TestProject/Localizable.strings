@@ -6,13 +6,13 @@
   Copyright (c) 2014 Alexandr Chernyshev. All rights reserved.
 */
 
-
 // crazy tests block
 "key1"="value1";"key2"="value2";
 "key3" = /* с1 */ "value3";
 "key4" /* c2 */ = "value4";
 "key5" = "value5" /* c3 */ ;
 "key6" /* c4 */ = /* c5 */ "value6"  /* c6 */ ;
+"spanish-key" = "Espa\U00f1ol - \Ud83d\Ude00";
 
 //Server
 "server.notrespond"                                     = "Сервер не отвечает";

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace StringsCore
 {
-    public class LocEntry
+    public abstract class LocEntry : ICloneable
     {
         public enum EntryType
         {
@@ -21,21 +21,41 @@ namespace StringsCore
             Document
         }
 
-        public EntryType type { get; private set; }
+        public EntryType Type { get; private set; }
+
+        public LocEntry() { }
 
         public LocEntry(EntryType type)
         {
-            this.type = type;
+            this.Type = type;
+        }
+
+        public object Clone()
+        {
+            var copy = System.Runtime.Serialization.FormatterServices.GetUninitializedObject(this.GetType()) as LocEntry;
+            CopyTo(copy);
+            return copy;
+        }
+
+        protected virtual void CopyTo(LocEntry o)
+        {
+            o.Type = this.Type;
         }
     }
 
     public abstract class LocTextEntry : LocEntry
     {
-        public string text;
+        public string Text;
 
         public LocTextEntry(string text, EntryType type) : base(type)
         {
-            this.text = text;
+            this.Text = text;
+        }
+
+        protected override void CopyTo(LocEntry o)
+        {
+            base.CopyTo(o);
+            (o as LocTextEntry).Text = this.Text;
         }
     }
 
@@ -50,7 +70,7 @@ namespace StringsCore
             entries.Add(entry);
         }
 
-        internal virtual void FinalizeTree()
+        public virtual void FinalizeTree()
         {
             foreach (LocEntry entry in entries)
             {
@@ -58,6 +78,18 @@ namespace StringsCore
                 {
                     (entry as LocTreeEntry).FinalizeTree();
                 }
+            }
+        }
+
+        protected override void CopyTo(LocEntry o)
+        {
+            base.CopyTo(o);
+            var copy = o as LocTreeEntry;
+            copy.entries = new List<LocEntry>();
+
+            foreach (var entry in entries)
+            {
+                copy.Append(entry.Clone() as LocEntry);
             }
         }
     }
@@ -68,7 +100,7 @@ namespace StringsCore
 
         public override string ToString()
         {
-            return String.Format("t: {0}", text);
+            return String.Format("t: {0}", Text);
         }
     }
 
@@ -78,7 +110,7 @@ namespace StringsCore
 
         public override string ToString()
         {
-            return String.Format("bc: {0}", text);
+            return String.Format("bc: {0}", Text);
         }
     }
 
@@ -88,7 +120,7 @@ namespace StringsCore
 
         public override string ToString()
         {
-            return string.Format("lc: {0}", text);
+            return string.Format("lc: {0}", Text);
         }
     }
 
@@ -121,14 +153,22 @@ namespace StringsCore
         {
             get
             {
-                return keyBlock?.text;
+                return keyBlock?.Text;
+            }
+            set
+            {
+                keyBlock.Text = value;
             }
         }
         public string Value
         {
             get
             {
-                return valueBlock?.text;
+                return valueBlock?.Text;
+            }
+            set
+            {
+                valueBlock.Text = value;
             }
         }
 
@@ -146,13 +186,26 @@ namespace StringsCore
             return sb.ToString();
         }
 
-        internal override void FinalizeTree()
+        public override void FinalizeTree()
         {
             base.FinalizeTree();
 
+            FindKeyValueEntries();
+        }
+
+        protected override void CopyTo(LocEntry o)
+        {
+            base.CopyTo(o);
+            var copy = o as LocPairBlock;
+
+            copy.FindKeyValueEntries();
+        }
+
+        private void FindKeyValueEntries()
+        {
             foreach (var entry in entries)
             {
-                switch (entry.type)
+                switch (entry.Type)
                 {
                     case EntryType.Key:
                         keyBlock = entry as KeyBlock;
@@ -171,7 +224,7 @@ namespace StringsCore
 
         public override string ToString()
         {
-            return string.Format("kb: {0}", text);
+            return string.Format("kb: {0}", Text);
         }
     }
 
@@ -181,20 +234,40 @@ namespace StringsCore
 
         public override string ToString()
         {
-            return string.Format("vb: {0}", text);
+            return string.Format("vb: {0}", Text);
         }
     }
 
     public class LocFile : LocTreeEntry
     {
         public LocFile() : base(EntryType.Document) { }
-        public IEnumerable<LocEntry> localizableEntries { get; private set; }
+        public IEnumerable<LocPairBlock> localizableEntries { get; protected set; }
 
-        internal override void FinalizeTree()
+        override public void FinalizeTree()
         {
             base.FinalizeTree();
 
-            localizableEntries = entries.Where(entry => entry.type == EntryType.LocPair);
+            localizableEntries = entries.Where(x => x.Type == EntryType.LocPair).Select(x => x as LocPairBlock);
+        }
+
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder("doc: ");
+            foreach (var entry in entries)
+            {
+                sb.Append(entry.ToString());
+                sb.Append("; ");
+            }
+
+            return sb.ToString();
+        }
+
+        protected override void CopyTo(LocEntry o)
+        {
+            base.CopyTo(o);
+            var copy = o as LocFile;
+
+            copy.localizableEntries = copy.entries.Where(x => x.Type == EntryType.LocPair).Select(x => x as LocPairBlock);
         }
     }
 }
