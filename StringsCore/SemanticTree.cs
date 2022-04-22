@@ -15,6 +15,7 @@ namespace StringsCore
             LineComment,
             Separator,
             Semicolon,
+            NewLine,
             Key,
             Value,
             LocPair,
@@ -141,6 +142,16 @@ namespace StringsCore
         public override string ToString()
         {
             return "\"; \"";
+        }
+    }
+
+    public class NewLineBlock : LocTextEntry
+    {
+        public NewLineBlock() : base("\n", EntryType.NewLine) { }
+
+        public override string ToString()
+        {
+            return "nl";
         }
     }
 

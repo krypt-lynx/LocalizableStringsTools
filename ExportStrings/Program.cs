@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using strings2csv;
 using StringsCore;
 using System.IO;
+using System.Threading;
 
 namespace ExportStrings
 {
@@ -21,8 +22,10 @@ namespace ExportStrings
                 Environment.Exit(1);
             }
 
-          /*  try
-            {*/
+#if !DEBUG
+            try
+            {
+#endif          
                 switch (args[0].ToLowerInvariant())
                 {
                     case "export":
@@ -34,15 +37,101 @@ namespace ExportStrings
                     case "generate":
                         Generate(args[1], args[2]);
                         break;
+                    case "test":
+                        Test();
+                        break;
                 }
-          /*  }
+#if !DEBUG
+            }
             catch (Exception e)
             {
-                Console.Error.WriteLine("Unexpected exception: {0}", e.Message);
+                Console.Error.WriteLine("Unexpected exception:");
+                LogExceptionRecursive(e);
                 Environment.Exit(2);
-            }*/
+            }
+#endif
+        }
+
+        static void LogExceptionRecursive(Exception e)
+        {
+            Console.Error.WriteLine(e.GetType().FullName);
+            Console.Error.WriteLine(e.Message);
+            Console.Error.WriteLine("Stacktrace:");
+            Console.Error.WriteLine(e.StackTrace);
+            Console.Error.WriteLine();
+
+            if (e.InnerException != null)
+            {
+                Console.Error.WriteLine("Inner exception:");
+                LogExceptionRecursive(e.InnerException);
+            }
+        }
+
+        private static void Test()
+        {
+
+            var indices = new int[] { 3, 2, 3, 4 };
+            var languages = new string[] { "EN (base)", "RU", "EN", "LV" };
+            var inputPaths = new string[] {
+                "input/Localization/Base.lproj/Localizable.strings",
+                "input/Localization/ru.lproj/Localizable.strings",
+                "input/Localization/en.lproj/Localizable.strings",
+                "input/Localization/lv.lproj/Localizable.strings"
+            };
+
+            var outputPaths = new string[] {
+                "output/Localization/Base.lproj/Localizable.strings",
+                "output/Localization/ru.lproj/Localizable.strings",
+                "output/Localization/en.lproj/Localizable.strings",
+                "output/Localization/lv.lproj/Localizable.strings"
+            };
+
+            StreamReader csvStream = new StreamReader(new FileStream(Path.Combine(approot, "src.csv"), FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+            var csv = CSV.ToList(csvStream);
+
+            var srcs = indices.Select(index => 
+                csv.Where(x => x[1].StartsWith("#")).Select(x => new List<string>(new string[] { x[1], x[index] })).ToList()
+                ).ToList();
 
 
+            var docs = new List<LocFile>();
+
+            for (int i = 0, imax = srcs.Count; i < imax; i++)
+            {
+                Console.WriteLine();
+                Console.WriteLine("Updating localization: {0}", languages[i]);
+
+                var srcPath = Path.Combine(approot, inputPaths[i]);
+
+                var loc = new LocFileParser(srcPath);
+                var doc = loc.Parse();
+
+                var src = srcs[i];
+                UpdateReplace(doc, src);
+
+                var dest = Path.Combine(approot, outputPaths[i]);
+
+                CreateRootDirForPath(dest);
+
+                var gen = new LocFileGenerator(doc);
+                gen.Write(Path.Combine(approot, dest));
+            }
+
+        }
+
+        private static void CreateRootDirForPath(string dest)
+        {
+            var dir = Path.GetDirectoryName(dest);
+
+            if (!Directory.Exists(dir))
+            {
+                Directory.CreateDirectory(dir);
+            }
+
+            while (!Directory.Exists(dir))
+            {
+                Thread.Sleep(100); // Windows magic
+            }
         }
 
         private static void Generate(string data, string dest)
@@ -90,7 +179,7 @@ namespace ExportStrings
                     ReplaceAppend(doc, csv);
                     break;
                 case UpdateStrategy.ReplaceOnly:
-                    UpdateReplace(doc, csv.ToDictionary(x => x[0], x => x[1]));
+                    UpdateReplace(doc, csv);
                     break;
             }
 
@@ -101,8 +190,6 @@ namespace ExportStrings
         private static void ReplaceAppend(LocFile doc, List<List<string>> csv)
         {
             var entryList = new LinkedList<LocEntry>(doc.entries);
-
-
             List<LinkedListNode<LocEntry>> nodes = new List<LinkedListNode<LocEntry>>();
             var node = entryList.First;
             while (node != null)
@@ -110,6 +197,7 @@ namespace ExportStrings
                 nodes.Add(node);
                 node = node.Next;
             }
+
             var locNodes = nodes.Where(x => x.Value.Type == LocEntry.EntryType.LocPair).ToDictionary(x => (x.Value as LocPairBlock).Key, x => x);
 
             LinkedListNode<LocEntry> lastKnownNode = null;
@@ -266,27 +354,54 @@ namespace ExportStrings
             return new TextBlock("\n");
         }
 
-        private static void UpdateReplace(LocFile doc, Dictionary<string, string> csv)
+        private static void UpdateReplace(LocFile doc, List<List<string>> csv)
         {
             var locEntries = doc.localizableEntries.ToList();
             int missedKeysCount = 0;
-            HashSet<string> usedKeys = new HashSet<string>();
+            //var newValues = csv.ToDictionary(x => x[0], x => x[1]);
+            var newValues = new Dictionary<string, string>();
+            foreach (var row in csv)
+            {
+                if (newValues.ContainsKey(row[0]))
+                {
+                    Console.WriteLine("Duplicate key: \"{0}\"", row[0]);
+                }
+
+                newValues[row[0]] = row[1];
+            }
+
+            HashSet<string> allKeys = new HashSet<string>(newValues.Keys);
 
             foreach (var entry in locEntries)
             {
-                if (csv.ContainsKey(entry.Key))
+                if (newValues.ContainsKey(entry.Key))
                 {
-                    entry.Value = csv[entry.Key];
-                    usedKeys.Add(entry.Key);
+                    allKeys.Remove(entry.Key);
+
+                    if (string.IsNullOrWhiteSpace(newValues[entry.Key]))
+                    {
+                        Console.WriteLine("New value for key: \"{0}\" is empty", entry.Key);
+                    }
+                    else
+                    {
+                        entry.Value = newValues[entry.Key];
+                    }
                 }
                 else
                 {
                     missedKeysCount++;
+                    Console.WriteLine("Missed key: \"{0}\" = \"{1}\"", entry.Key, entry.Value);
+
                 }
             }
+            Console.WriteLine("Missed keys total: {0}", missedKeysCount);
 
-            Console.WriteLine("Missed keys: {0}", missedKeysCount);
-            Console.WriteLine("Unused keys: {0}", locEntries.Count() - usedKeys.Count);
+            foreach (var key in allKeys)
+            {
+                Console.WriteLine("Unused key: \"{0}\" = \"{1}\"", key, newValues[key]);
+            }
+
+            Console.WriteLine("Unused keys total: {0}", allKeys.Count);
         }
 
         private static void Export(string src, string dest)

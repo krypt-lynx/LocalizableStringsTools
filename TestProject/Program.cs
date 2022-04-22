@@ -14,6 +14,9 @@ namespace TestProject
             var parser = new LocFileParser(System.IO.Path.Combine(approot, "Localizable.strings"));
             var document = parser.Parse();
 
+            var normalizer = new Normalizer();
+            normalizer.Normalize(document);
+
             var generator = new LocFileGenerator(document);
             generator.Write(System.IO.Path.Combine(approot, "restored.strings"));
 

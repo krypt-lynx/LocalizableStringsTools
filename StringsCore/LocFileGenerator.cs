@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace StringsCore
@@ -55,7 +56,7 @@ namespace StringsCore
                         {
                             writer.Write("//");
                             writer.Write(textEntry.Text);
-                            writer.WriteLine();
+                            writer.Write("\n");
                         }
                         break;
                     case LocEntry.EntryType.Text:
@@ -73,10 +74,15 @@ namespace StringsCore
                         break;
                     case LocEntry.EntryType.Separator:
                     case LocEntry.EntryType.Semicolon:
+                    case LocEntry.EntryType.NewLine:
                         {
                             writer.Write(textEntry.Text);
                         }
                         break;
+                    default:
+                        {
+                            throw new InvalidOperationException(string.Format("Unexpected type: {0}", entry.Type));
+                        }
                 }
             }
             writer.Flush();
