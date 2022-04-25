@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
-using System.IO;
 
-namespace strings2csv
+namespace csv
 {
     static class CSV
     {
@@ -15,10 +15,8 @@ namespace strings2csv
 
         const string CSV_ROW_WRITE_DELIMETER = "\r\n";
 
-        public static List<List<string>> ToList(TextReader reader)
+        public static IEnumerable<List<string>> Read(TextReader reader)
         {
-            List<List<string>> result = new List<List<string>>();
-
             List<string> row = new List<string>();
             StringBuilder cell = new StringBuilder();
 
@@ -75,7 +73,7 @@ namespace strings2csv
                         cell = new StringBuilder();
                         if ((char)ch == CSV_ROW_DELIMETER)
                         {
-                            result.Add(row);
+                            yield return row;
                             row = new List<string>();
                             somethingReaded = false;
                         }
@@ -97,13 +95,11 @@ namespace strings2csv
             if (somethingReaded)
             {
                 row.Add(readCSVString(cell.ToString()));
-                result.Add(row);
+                yield return row;
             }
-
-            return result;
         }
 
-        public static string ToString(List<List<string>> table)
+        public static string ToString(IEnumerable<IEnumerable<string>> table)
         {
             StringWriter writer = new StringWriter();
             Write(writer, table);
@@ -111,23 +107,28 @@ namespace strings2csv
             return writer.ToString();
         }
 
-        public static void Write(TextWriter writer, List<List<string>> table)
+        public static void Write(TextWriter writer, IEnumerable<IEnumerable<string>> table)
         {
-            writer.Write("\uFEFF"); // utf8 BOM marker
-            for (int i = 0; i < table.Count; i++)
+            bool firstRow = true;
+            bool firstCell;
+            foreach (var row in table)
             {
-                List<string> row = table[i];
-                for (int j = 0; j < row.Count; j++)
+                if (!firstRow)
                 {
-                    string cell = row[j];
-
-                    writeCSVString(writer, cell);
-
-                    if (j != row.Count-1)
-                        writer.Write(CSV_CELL_DELIMETER);
-                }
-                if (i != table.Count - 1)
                     writer.Write(CSV_ROW_WRITE_DELIMETER);
+                }
+                firstRow = false;
+
+                firstCell = true;
+                foreach (var cell in row)
+                {
+                    if (!firstCell)
+                    {
+                        writer.Write(CSV_CELL_DELIMETER);
+                    }
+                    firstCell = false;
+                    writeCSVString(writer, cell);
+                }
             }
         }
 
