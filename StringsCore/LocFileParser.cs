@@ -6,12 +6,18 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 
+// Идеи по улучшению
+// Флаг-индикатор был ли использован символ и его обработка
+// Поддержка вложенности
+// Разбить на модули
+
 namespace StringsCore
 {
     enum ParserState
     {
         WaitingKey,
         InKey,
+        InInlineKey,
         WaitingSeparator,
         WaitingValue,
         InValue,
@@ -32,6 +38,7 @@ namespace StringsCore
         UTF8Code,
 
         Done,
+        DoneNotConsumed,
         SyntaxError
     }
 
@@ -99,7 +106,7 @@ namespace StringsCore
             {
                 if (rawChar == '\n')
                 {
-                    position = 1;
+                    position = 0;
                     line++;
                 }
                 else
@@ -114,6 +121,9 @@ namespace StringsCore
                         break;
                     case ParserState.InKey:
                         this.ProcessInKey((char)rawChar);
+                        break;
+                    case ParserState.InInlineKey:
+                        this.ProcessInInlineKey((char)rawChar);
                         break;
 
                     case ParserState.WaitingSeparator:
@@ -301,6 +311,16 @@ namespace StringsCore
                             this.parserState = ParserState.WaitingKey;
                             this.currentText.Append(rawChar);
                         }
+                        else if (char.IsLetterOrDigit(rawChar))
+                        {
+                            AppendTextBlockIfNeeded();
+                            this.parserState = ParserState.InInlineKey;
+                            this.InitReadInlineString();
+                            LocTreeEntry pair = new LocPairBlock();
+                            docStack.Peek().Append(pair);
+                            docStack.Push(pair);
+                            this.ProcessReadInlineString(rawChar);
+                        }
                         else
                         {
                             this.parserState = ParserState.SyntaxError;
@@ -325,7 +345,14 @@ namespace StringsCore
             this.currentString = new StringBuilder();
         }
 
+        private void InitReadInlineString()
+        {
+            this.stringSubstate = ParserStringSubstate.None;
+            this.currentString = new StringBuilder();
+        }
+
         private StringBuilder currentString = new StringBuilder();
+
         private void ProcessInKey(char rawChar)
         {
             this.ProcessReadString(rawChar);
@@ -345,7 +372,19 @@ namespace StringsCore
                     }
                     break;
             }
+        }
 
+        private void ProcessInInlineKey(char rawChar)
+        {
+            this.ProcessReadInlineString(rawChar);
+            if (stringSubstate == ParserStringSubstate.DoneNotConsumed)
+            {
+                currentKey = currentString.ToString();
+                parserState = ParserState.WaitingSeparator;
+                docStack.Peek().Append(new KeyBlock(currentKey, true));
+
+                this.ProcessWaitingSeparator((char)rawChar); // TODO: костыль
+            }
         }
 
         private void ProcessInValue(char rawChar)
@@ -387,6 +426,38 @@ namespace StringsCore
                         this.ProcessUnicodeChar(rawChar);                        
                     }
                     break;
+                default:
+                    throw new Exception("internal inconsistency");
+            }
+        }
+
+        private void ProcessReadInlineString(char rawChar)
+        {
+            switch (stringSubstate)
+            {
+                case ParserStringSubstate.None:
+                    {
+                        this.ProcessInlineStringChar(rawChar);
+                    }
+                    break;
+                default:
+                    throw new Exception("internal inconsistency");
+            }
+        }
+
+        private void ProcessInlineStringChar(char rawChar)
+        {
+            if (char.IsLetterOrDigit(rawChar) || // todo: propper characters list
+                rawChar == '_' ||
+                rawChar == '.' ||
+                rawChar == ':')
+            {
+                currentString.Append(rawChar);
+                stringSubstate = ParserStringSubstate.None;
+            }
+            else
+            {
+                stringSubstate = ParserStringSubstate.DoneNotConsumed;
             }
         }
 

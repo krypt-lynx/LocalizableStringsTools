@@ -231,7 +231,12 @@ namespace StringsCore
 
     public class KeyBlock : LocTextEntry
     {
-        public KeyBlock(string text) : base(text, EntryType.Key) { }
+        public KeyBlock(string text, bool inline = false) : base(text, EntryType.Key) 
+        {
+            Inline = inline; 
+        }
+
+        public bool Inline = false;
 
         public override string ToString()
         {
@@ -252,13 +257,24 @@ namespace StringsCore
     public class LocFile : LocTreeEntry
     {
         public LocFile() : base(EntryType.Document) { }
-        public IEnumerable<LocPairBlock> localizableEntries { get; protected set; }
+        public SortedDictionary<string, LocPairBlock> localizableEntries { get; protected set; }
 
         override public void FinalizeTree()
         {
             base.FinalizeTree();
 
-            localizableEntries = entries.Where(x => x.Type == EntryType.LocPair).Select(x => x as LocPairBlock);
+            CacheLocEntries();
+
+            //localizableEntries = entries.Where(x => x.Type == EntryType.LocPair).Select(x => x as LocPairBlock).ToArray();
+        }
+
+        private void CacheLocEntries()
+        {
+            localizableEntries = new SortedDictionary<string, LocPairBlock>();
+            foreach (var entry in entries.Where(x => x.Type == EntryType.LocPair).Cast<LocPairBlock>())
+            {
+                localizableEntries[entry.Key] = entry;
+            }
         }
 
         public override string ToString()
@@ -278,7 +294,7 @@ namespace StringsCore
             base.CopyTo(o);
             var copy = o as LocFile;
 
-            copy.localizableEntries = copy.entries.Where(x => x.Type == EntryType.LocPair).Select(x => x as LocPairBlock);
+            copy.CacheLocEntries();
         }
     }
 }
