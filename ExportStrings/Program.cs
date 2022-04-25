@@ -3,44 +3,120 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using strings2csv;
+using csv;
 using StringsCore;
 using System.IO;
 using System.Threading;
+using CommandLine;
 
 namespace ExportStrings
 {
     class Program
     {
+        public class Verbs
+        {
+            [Verb("export", HelpText = "export translation to csv table")]
+            public class Export
+            {
+                [Value(0, HelpText = "Input file or directoty")]
+                public IEnumerable<string> Input { get; set; }
+
+                [Option("output", Required = true, HelpText = "Path to mod directory")]
+                public string Output { get; set; }
+
+                [Option("monolith", Default = false, HelpText = "Output as single file")]
+                public bool SingleFile { get; set; }
+
+                [Option("keysonly", Default = false, HelpText = "export keys only")]
+                public bool KeysOnly { get; set; }
+
+                [Option("filter", Default = "*.strings", HelpText = "Filter to match files")]
+                public string Filter { get; set; }
+
+                [Option("header", Default = true, HelpText = "insert table header")]
+                public bool Header { get; set; }
+            }
+
+            [Verb("test", HelpText = "export translation to csv table")]
+            public class Test
+            {
+
+            }
+        }
+
+        public class LocalizatiomProject
+        {
+            public string Path { get; set; }
+            public StringsFileInfo[] Files { get; set; }
+
+            public override string ToString()
+            {
+                return $"Project: {Path}; {Files?.Length ?? 0} file(s)";
+            }
+        }
+
+        public class StringsFileInfo
+        {
+            public string Path { get; set; }
+
+            public string Project { get; set; }
+            public string Locale { get; set; }
+
+            public string ProjectPath { get; set; }
+            public string FileName { get; set; }
+
+            public LocFile SemanticTree { get; set; }
+
+            public override string ToString()
+            {
+                return $"Project: {ProjectPath}; Locale: {Locale}; File: {FileName}";
+            }
+        }
+
+        /*
+
+        public class Parameters
+        {
+            public string Path { get; set; }
+            [Option("version", Required = true, HelpText = "version to resolve paths for")]
+            public string Version { get; set; }
+
+        }
+        */
+
         static string approot = AppDomain.CurrentDomain.BaseDirectory;
 
         static void Main(string[] args)
         {
-            if (args.Length < 1)
-            {
-                Console.WriteLine("usage: exportstrings <input file> <output file>");
-                Environment.Exit(1);
-            }
+            Parser.Default.ParseArguments(args, new Type[] { typeof(Verbs.Export), typeof(Verbs.Test) })
+                .WithParsed<Verbs.Export>(Export);
+
+            Console.WriteLine(testS.Count);
+            Console.ReadKey();
+            Environment.Exit(0);
+            return;
+
+
 
 #if !DEBUG
             try
             {
-#endif          
-                switch (args[0].ToLowerInvariant())
-                {
-                    case "export":
-                        Export(args[1], args[2]);
-                        break;
-                    case "update":
-                        Update(args[1], args[2], args[3], args[4]);
-                        break;
-                    case "generate":
-                        Generate(args[1], args[2]);
-                        break;
-                    case "test":
-                        Test();
-                        break;
-                }
+#endif
+            switch (args[0].ToLowerInvariant())
+            {
+                case "export":
+                    Export(args[1], args[2]);
+                    break;
+                case "update":
+                    Update(args[1], args[2], args[3], args[4]);
+                    break;
+                case "generate":
+                    Generate(args[1], args[2]);
+                    break;
+                case "test":
+                    Test();
+                    break;
+            }
 #if !DEBUG
             }
             catch (Exception e)
@@ -51,6 +127,184 @@ namespace ExportStrings
             }
 #endif
         }
+
+        static void Export(Verbs.Export options)
+        {
+            List<StringsFileInfo> infos = new List<StringsFileInfo>();
+
+            foreach (var path in options.Input)
+            {
+                var input = ResolvePaths(path, options.Filter);
+                foreach (var line in input)
+                {
+                    var info = ResolveFileInfo(line);
+                    infos.Add(info);
+                   // Console.WriteLine(info);
+                }
+            }
+
+            var projects = CreateProjects(infos, options).ToArray();
+
+            foreach (var prj in projects)
+            {
+                LoadFiles(prj);
+            }
+
+            foreach (var prj in projects)
+            {
+                CreateTable(prj, options);
+            }
+        }
+
+        static int testI = 0;
+        static HashSet<string> testS = new HashSet<string>();
+        private static void CreateTable(LocalizatiomProject prj, Verbs.Export options)
+        {
+
+            SortedSet<string> keys = new SortedSet<string>();
+
+            foreach (var file in prj.Files)
+            {
+                keys.UnionWith(file.SemanticTree.localizableEntries.Select(x => x.Key));
+            }
+
+            testS.UnionWith(keys);
+
+            IEnumerable<IEnumerable<string>> GenTable()
+            {
+                IEnumerable<string> GenHeader()
+                {
+                    yield return "";
+                    if (!options.KeysOnly)
+                    {
+                        foreach (var file in prj.Files)
+                        {
+                            yield return file.Locale;
+                        }
+                    }
+                }
+
+
+                IEnumerable<string> GenRow(string key)
+                {
+                    yield return key;
+                    if (!options.KeysOnly)
+                    {
+                        foreach (var file in prj.Files)
+                        {
+                            if (file.SemanticTree.localizableEntries.ContainsKey(key))
+                            {
+                                yield return file.SemanticTree.localizableEntries[key].Value;
+                            }
+                            else
+                            {
+                                Console.WriteLine($"Key {key} is missing in file:\n{file.Path}");
+                                yield return "";
+                            }
+                            
+                        }
+                    }
+                }
+
+                if (options.Header)
+                {
+                    yield return GenHeader();
+                }
+                
+                foreach (var key in keys)
+                {
+                    yield return GenRow(key);
+                }
+
+                yield break;
+            }
+
+
+            using (TextWriter test = new StreamWriter(new FileStream($"D:\\test{testI++}.scv", FileMode.Create, FileAccess.Write, FileShare.Read)))
+            {
+                CSV.Write(test, GenTable());
+            }
+            //Console.ReadKey();
+        }
+
+        static void LoadFiles(LocalizatiomProject prj)
+        {
+            foreach (var file in prj.Files)
+            {
+                var parser = new LocFileParser(file.Path);
+                var loc = parser.Parse();
+
+                file.SemanticTree = loc;
+            }
+        }
+
+        static IEnumerable<LocalizatiomProject> CreateProjects(IEnumerable<StringsFileInfo> files, Verbs.Export options)
+        {
+            if (options.SingleFile)
+            {
+                return new LocalizatiomProject
+                {
+                    Path = null,
+                    Files = files.ToArray()
+                }.Yield();
+            }
+            else
+            {
+                return files
+                    .GroupBy(x => x.ProjectPath)
+                    .Select(x => new LocalizatiomProject
+                    {
+                        Path = x.Key,
+                        Files = x.ToArray()
+                    });                    
+            }
+        }
+
+            static IEnumerable<string> ResolvePaths(string path, string filter)
+        {
+            if (File.Exists(path))
+            {
+                yield return path;
+            }
+            else
+            {
+                foreach (var file in Directory.GetFiles(path, filter, SearchOption.AllDirectories))
+                {
+                    yield return Path.GetFullPath(file);
+                }
+            }
+        }
+        
+
+        static StringsFileInfo ResolveFileInfo(string path)
+        {
+            const string LPROJ_EXTENSION = ".lproj";
+
+            var components = path.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            StringsFileInfo info = new StringsFileInfo {  Path = path };
+            if (components.Length >= 0)
+            {
+                info.FileName = components[components.Length - 1];
+
+                if (components.Length >= 1)
+                {
+                    var maybeLocale = components[components.Length - 2];
+                    if (maybeLocale.ToLowerInvariant().EndsWith(LPROJ_EXTENSION)) {
+                        info.Locale = maybeLocale.Substring(0, maybeLocale.Length - LPROJ_EXTENSION.Length);
+                    }
+                }
+                info.Locale = info.Locale ?? "";
+
+                if (components.Length >= 2)
+                {
+                    info.Project = components[components.Length - 3];
+                    info.ProjectPath = Path.Combine(components.SkipLast(2).ToArray());
+                }
+            }
+
+            return info;
+        }
+
 
         static void LogExceptionRecursive(Exception e)
         {
@@ -87,7 +341,7 @@ namespace ExportStrings
             };
 
             StreamReader csvStream = new StreamReader(new FileStream(Path.Combine(approot, "src.csv"), FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-            var csv = CSV.ToList(csvStream);
+            var csv = CSV.Read(csvStream);
 
             var srcs = indices.Select(index => 
                 csv.Where(x => x[1].StartsWith("#")).Select(x => new List<string>(new string[] { x[1], x[index] })).ToList()
@@ -137,7 +391,7 @@ namespace ExportStrings
         private static void Generate(string data, string dest)
         {
             StreamReader stream = new StreamReader(Path.Combine(approot, data));
-            var csv = CSV.ToList(stream).ToDictionary(x => x[0], x => x[1]);
+            var csv = CSV.Read(stream).ToDictionary(x => x[0], x => x[1]);
 
             LocFile doc = new LocFile();
 
@@ -168,18 +422,18 @@ namespace ExportStrings
             var doc = loc.Parse();
 
             StreamReader stream = new StreamReader(Path.Combine(approot, data));
-            var csv = CSV.ToList(stream);//
+            var csv = CSV.Read(stream);//
 
             switch (updateStrategy)
             {
                 case UpdateStrategy.AppendOnly:
                     throw new NotImplementedException();
                     //break;
-                case UpdateStrategy.ReplaceAndAppend:
-                    ReplaceAppend(doc, csv);
+                case UpdateStrategy.ReplaceAndAppend: 
+                    ReplaceAppend(doc, csv.ToList());
                     break;
                 case UpdateStrategy.ReplaceOnly:
-                    UpdateReplace(doc, csv);
+                    UpdateReplace(doc, csv.ToList());
                     break;
             }
 
@@ -356,6 +610,7 @@ namespace ExportStrings
 
         private static void UpdateReplace(LocFile doc, List<List<string>> csv)
         {
+            /*
             var locEntries = doc.localizableEntries.ToList();
             int missedKeysCount = 0;
             //var newValues = csv.ToDictionary(x => x[0], x => x[1]);
@@ -402,16 +657,19 @@ namespace ExportStrings
             }
 
             Console.WriteLine("Unused keys total: {0}", allKeys.Count);
+            */
         }
 
         private static void Export(string src, string dest)
         {
+            /*
             var loc = new LocFileParser(System.IO.Path.Combine(approot, src));
             var doc = loc.Parse();
 
             StreamWriter csv = new StreamWriter(System.IO.Path.Combine(approot, dest));
             CSV.Write(csv, doc.localizableEntries.Select(x => new List<string>(new string[] { x.Key, x.Value })).ToList());
             csv.Close();
+            */
         }
     }
 }
