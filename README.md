@@ -1,2 +1,2 @@
 # LocalizableStringsTools
-A messy attempt at reinventhing the wheel
+A messy and unfinished attempt at reinventhing the wheel
