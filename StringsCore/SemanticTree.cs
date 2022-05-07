@@ -257,24 +257,18 @@ namespace StringsCore
     public class LocFile : LocTreeEntry
     {
         public LocFile() : base(EntryType.Document) { }
-        public SortedDictionary<string, LocPairBlock> localizableEntries { get; protected set; }
+        public ILookup<string, LocPairBlock> localizableEntries { get; protected set; }
 
         override public void FinalizeTree()
         {
             base.FinalizeTree();
 
             CacheLocEntries();
-
-            //localizableEntries = entries.Where(x => x.Type == EntryType.LocPair).Select(x => x as LocPairBlock).ToArray();
         }
 
         private void CacheLocEntries()
         {
-            localizableEntries = new SortedDictionary<string, LocPairBlock>();
-            foreach (var entry in entries.Where(x => x.Type == EntryType.LocPair).Cast<LocPairBlock>())
-            {
-                localizableEntries[entry.Key] = entry;
-            }
+            localizableEntries = entries.Where(x => x.Type == EntryType.LocPair).Cast<LocPairBlock>().ToLookup(x => x.Key);
         }
 
         public override string ToString()

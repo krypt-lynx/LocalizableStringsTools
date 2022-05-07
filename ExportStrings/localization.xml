@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<project>
+  <localizables>
+    <LocalizableGroup name="test1">
+      <!-- can be multiple values to localization folders or .string-files directly -->
+      <path>./Archive</path>
+    </LocalizableGroup>
+
+    <LocalizableGroup name="test2" mapping="lokalize">
+      <path>./Mobile-Localizable</path>
+    </LocalizableGroup>  
+  </localizables>
+  <mappings>
+    <mapping name="lokalize">
+      <!-- 
+      redirected localization is loses its original name for forther uses
+      this behaviour does not affects this file
+      if locale is not listed - it uses its original key
+      -->
+      <map src="en" locale="Base"/>
+      <map src="en" locale="en-AU"/>
+      <map src="en-GB" locale="en-GB"/>
+      <map src="de" locale="de"/>
+      <map src="es-419" locale="es"/>
+      <map src="fr-CA" locale="fr"/>
+      <map src="it" locale="it"/>
+      <map src="ja" locale="ja"/>
+      <map src="nl-NL" locale="nl"/>
+      <!-- <map src="example" irnore="true"/> -->
+    </mapping>
+  </mappings>
+</project>

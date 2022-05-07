@@ -8,90 +8,21 @@ using StringsCore;
 using System.IO;
 using System.Threading;
 using CommandLine;
+using ExportStrings.LocProject;
 
 namespace ExportStrings
 {
     class Program
     {
-        public class Verbs
-        {
-            [Verb("export", HelpText = "export translation to csv table")]
-            public class Export
-            {
-                [Value(0, HelpText = "Input file or directoty")]
-                public IEnumerable<string> Input { get; set; }
-
-                [Option("output", Required = true, HelpText = "Path to mod directory")]
-                public string Output { get; set; }
-
-                [Option("monolith", Default = false, HelpText = "Output as single file")]
-                public bool SingleFile { get; set; }
-
-                [Option("keysonly", Default = false, HelpText = "export keys only")]
-                public bool KeysOnly { get; set; }
-
-                [Option("filter", Default = "*.strings", HelpText = "Filter to match files")]
-                public string Filter { get; set; }
-
-                [Option("header", Default = true, HelpText = "insert table header")]
-                public bool Header { get; set; }
-            }
-
-            [Verb("test", HelpText = "export translation to csv table")]
-            public class Test
-            {
-
-            }
-        }
-
-        public class LocalizatiomProject
-        {
-            public string Path { get; set; }
-            public StringsFileInfo[] Files { get; set; }
-
-            public override string ToString()
-            {
-                return $"Project: {Path}; {Files?.Length ?? 0} file(s)";
-            }
-        }
-
-        public class StringsFileInfo
-        {
-            public string Path { get; set; }
-
-            public string Project { get; set; }
-            public string Locale { get; set; }
-
-            public string ProjectPath { get; set; }
-            public string FileName { get; set; }
-
-            public LocFile SemanticTree { get; set; }
-
-            public override string ToString()
-            {
-                return $"Project: {ProjectPath}; Locale: {Locale}; File: {FileName}";
-            }
-        }
-
-        /*
-
-        public class Parameters
-        {
-            public string Path { get; set; }
-            [Option("version", Required = true, HelpText = "version to resolve paths for")]
-            public string Version { get; set; }
-
-        }
-        */
-
         static string approot = AppDomain.CurrentDomain.BaseDirectory;
 
         static void Main(string[] args)
         {
-            Parser.Default.ParseArguments(args, new Type[] { typeof(Verbs.Export), typeof(Verbs.Test) })
-                .WithParsed<Verbs.Export>(Export);
+            var config = new Configuration.Settings(Path.Combine(approot, "localization.xml"));
 
-            Console.WriteLine(testS.Count);
+            Parser.Default.ParseArguments(args, new Type[] { typeof(Verbs.Export), typeof(Verbs.Test) })                
+                .WithParsed<Verbs.Export>(opt => new Workers.ExportWorker(config, opt).Do());
+          
             Console.ReadKey();
             Environment.Exit(0);
             return;
@@ -128,182 +59,6 @@ namespace ExportStrings
 #endif
         }
 
-        static void Export(Verbs.Export options)
-        {
-            List<StringsFileInfo> infos = new List<StringsFileInfo>();
-
-            foreach (var path in options.Input)
-            {
-                var input = ResolvePaths(path, options.Filter);
-                foreach (var line in input)
-                {
-                    var info = ResolveFileInfo(line);
-                    infos.Add(info);
-                   // Console.WriteLine(info);
-                }
-            }
-
-            var projects = CreateProjects(infos, options).ToArray();
-
-            foreach (var prj in projects)
-            {
-                LoadFiles(prj);
-            }
-
-            foreach (var prj in projects)
-            {
-                CreateTable(prj, options);
-            }
-        }
-
-        static int testI = 0;
-        static HashSet<string> testS = new HashSet<string>();
-        private static void CreateTable(LocalizatiomProject prj, Verbs.Export options)
-        {
-
-            SortedSet<string> keys = new SortedSet<string>();
-
-            foreach (var file in prj.Files)
-            {
-                keys.UnionWith(file.SemanticTree.localizableEntries.Select(x => x.Key));
-            }
-
-            testS.UnionWith(keys);
-
-            IEnumerable<IEnumerable<string>> GenTable()
-            {
-                IEnumerable<string> GenHeader()
-                {
-                    yield return "";
-                    if (!options.KeysOnly)
-                    {
-                        foreach (var file in prj.Files)
-                        {
-                            yield return file.Locale;
-                        }
-                    }
-                }
-
-
-                IEnumerable<string> GenRow(string key)
-                {
-                    yield return key;
-                    if (!options.KeysOnly)
-                    {
-                        foreach (var file in prj.Files)
-                        {
-                            if (file.SemanticTree.localizableEntries.ContainsKey(key))
-                            {
-                                yield return file.SemanticTree.localizableEntries[key].Value;
-                            }
-                            else
-                            {
-                                Console.WriteLine($"Key {key} is missing in file:\n{file.Path}");
-                                yield return "";
-                            }
-                            
-                        }
-                    }
-                }
-
-                if (options.Header)
-                {
-                    yield return GenHeader();
-                }
-                
-                foreach (var key in keys)
-                {
-                    yield return GenRow(key);
-                }
-
-                yield break;
-            }
-
-
-            using (TextWriter test = new StreamWriter(new FileStream($"D:\\test{testI++}.scv", FileMode.Create, FileAccess.Write, FileShare.Read)))
-            {
-                CSV.Write(test, GenTable());
-            }
-            //Console.ReadKey();
-        }
-
-        static void LoadFiles(LocalizatiomProject prj)
-        {
-            foreach (var file in prj.Files)
-            {
-                var parser = new LocFileParser(file.Path);
-                var loc = parser.Parse();
-
-                file.SemanticTree = loc;
-            }
-        }
-
-        static IEnumerable<LocalizatiomProject> CreateProjects(IEnumerable<StringsFileInfo> files, Verbs.Export options)
-        {
-            if (options.SingleFile)
-            {
-                return new LocalizatiomProject
-                {
-                    Path = null,
-                    Files = files.ToArray()
-                }.Yield();
-            }
-            else
-            {
-                return files
-                    .GroupBy(x => x.ProjectPath)
-                    .Select(x => new LocalizatiomProject
-                    {
-                        Path = x.Key,
-                        Files = x.ToArray()
-                    });                    
-            }
-        }
-
-            static IEnumerable<string> ResolvePaths(string path, string filter)
-        {
-            if (File.Exists(path))
-            {
-                yield return path;
-            }
-            else
-            {
-                foreach (var file in Directory.GetFiles(path, filter, SearchOption.AllDirectories))
-                {
-                    yield return Path.GetFullPath(file);
-                }
-            }
-        }
-        
-
-        static StringsFileInfo ResolveFileInfo(string path)
-        {
-            const string LPROJ_EXTENSION = ".lproj";
-
-            var components = path.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-            StringsFileInfo info = new StringsFileInfo {  Path = path };
-            if (components.Length >= 0)
-            {
-                info.FileName = components[components.Length - 1];
-
-                if (components.Length >= 1)
-                {
-                    var maybeLocale = components[components.Length - 2];
-                    if (maybeLocale.ToLowerInvariant().EndsWith(LPROJ_EXTENSION)) {
-                        info.Locale = maybeLocale.Substring(0, maybeLocale.Length - LPROJ_EXTENSION.Length);
-                    }
-                }
-                info.Locale = info.Locale ?? "";
-
-                if (components.Length >= 2)
-                {
-                    info.Project = components[components.Length - 3];
-                    info.ProjectPath = Path.Combine(components.SkipLast(2).ToArray());
-                }
-            }
-
-            return info;
-        }
 
 
         static void LogExceptionRecursive(Exception e)
