@@ -18,7 +18,7 @@ namespace ExportStrings
 
         static void Main(string[] args)
         {
-            var config = new Configuration.Settings(Path.Combine(approot, "localization.xml"));
+            var config = new Configuration.Configuration(Path.Combine(approot, "localization.xml"));
 
             Parser.Default.ParseArguments(args, new Type[] { typeof(Verbs.Export), typeof(Verbs.Test) })                
                 .WithParsed<Verbs.Export>(opt => new Workers.ExportWorker(config, opt).Do());

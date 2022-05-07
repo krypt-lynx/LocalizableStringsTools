@@ -22,15 +22,7 @@ namespace ExportStrings.Verbs
         [Option("keysonly", Default = false, HelpText = "export keys only")]
         public bool KeysOnly { get; set; }
 
-        [Option("filter", Default = "*.strings", HelpText = "Filter to match files")]
-        public string Filter { get; set; }
-
         [Option("header", Default = true, HelpText = "insert table header")]
         public bool Header { get; set; }
-    }
-
-    public class ExportWorker
-    {
-
     }
 }

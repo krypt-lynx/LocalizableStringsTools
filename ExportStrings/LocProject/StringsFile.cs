@@ -12,10 +12,8 @@ namespace ExportStrings.LocProject
     {
         public string Path { get; private set; }
 
-        public string Project { get; private set; }
         public string Locale { get; private set; }
 
-        public string ProjectPath { get; private set; }
         public string FileName { get; private set; }
 
         public LocFile semanticTree;
@@ -32,10 +30,11 @@ namespace ExportStrings.LocProject
             }
         }
 
-        public StringsFile(string path)
+        public StringsFile(string path, string locale)
         {
 
             Path = path;
+            Locale = locale;
 
             ParsePath(path);
         }
@@ -43,26 +42,8 @@ namespace ExportStrings.LocProject
         private void ParsePath(string path)
         {
             var components = path.Split(IOPath.DirectorySeparatorChar, IOPath.AltDirectorySeparatorChar);
-            if (components.Length >= 0)
-            {
-                FileName = components[components.Length - 1];
 
-                if (components.Length >= 1)
-                {
-                    var maybeLocale = components[components.Length - 2];
-                    if (maybeLocale.ToLowerInvariant().EndsWith(Constants.LPROJ_EXTENSION))
-                    {
-                        Locale = maybeLocale.Substring(0, maybeLocale.Length - Constants.LPROJ_EXTENSION.Length);
-                    }
-                }
-                Locale = Locale ?? "";
-
-                if (components.Length >= 2)
-                {
-                    Project = components[components.Length - 3];
-                    ProjectPath = IOPath.Combine(components.SkipLast(2).ToArray());
-                }
-            }
+            FileName = components.Last();
         }
 
         private LocFile LoadStrings()
@@ -91,7 +72,7 @@ namespace ExportStrings.LocProject
 
         public override string ToString()
         {
-            return $"Project: {ProjectPath}; Locale: {Locale}; File: {FileName}";
+            return $"Locale: {Locale}; File: {FileName}";
         }
 
         public IEnumerable<string> Keys

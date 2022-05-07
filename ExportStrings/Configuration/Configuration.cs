@@ -50,12 +50,12 @@ namespace ExportStrings.Configuration
         }
     }
 
-    class Settings
+    class Configuration
     {
-        public LocalizableGroup[] lprojects;
-        public LocaleMapping[] localeMappings;
+        public Dictionary<string, LocalizableGroup> lprojects;
+        public Dictionary<string, LocaleMapping> localeMappings;
 
-        public Settings(string path)
+        public Configuration(string path)
         {
             var xdoc = new XmlDocument();
             xdoc.Load(path);
@@ -64,13 +64,13 @@ namespace ExportStrings.Configuration
                 xdoc.SelectNodes("project/localizables/LocalizableGroup")
                 .FilterNodes<XmlElement>()
                 .Select(x => new LocalizableGroup(x))
-                .ToArray();
+                .ToDictionary(x => x.Name);
 
             localeMappings =
                 xdoc.SelectNodes("project/mappings/mapping")
                 .FilterNodes<XmlElement>()
                 .Select(x => new LocaleMapping(x))
-                .ToArray();
+                .ToDictionary(x => x.Name);
         }
     }
 }

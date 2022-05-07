@@ -3,7 +3,7 @@
   <localizables>
     <LocalizableGroup name="test1">
       <!-- can be multiple values to localization folders or .string-files directly -->
-      <path>./Archive</path>
+      <path>./Archive/CoreUnite/Resources/Localization</path>
     </LocalizableGroup>
 
     <LocalizableGroup name="test2" mapping="lokalize">

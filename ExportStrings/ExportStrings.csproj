@@ -85,7 +85,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Configuration\Settings.cs" />
+    <Compile Include="Configuration\Configuration.cs" />
     <Compile Include="jff-csv.cs" />
     <Compile Include="Linq.cs" />
     <Compile Include="LocProject\Constants.cs" />

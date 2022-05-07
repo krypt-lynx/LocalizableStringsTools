@@ -12,33 +12,17 @@ namespace ExportStrings.Workers
 {
     class ExportWorker : BaseWorker<Verbs.Export>
     {
-        public ExportWorker(Settings settings, Verbs.Export verb) : base(settings, verb) { }
+        public ExportWorker(Configuration.Configuration settings, Verbs.Export verb) : base(settings, verb) { }
 
         public override void Do()
         {
-            List<StringsFile> infos = new List<StringsFile>();
-
-            foreach (var path in verb.Input)
-            {
-                var input = ResolvePaths(path, verb.Filter);
-                foreach (var line in input)
-                {
-                    var info = new StringsFile(line);
-                    infos.Add(info);
-                    //Console.WriteLine(info);
-                }
-            }
-
-            var projects = CreateProjects(infos).ToArray();
+            List<LocalizationProject> projects = LoadProjects(verb.Input);
 
             foreach (var prj in projects)
             {
                 CreateTable(prj, verb);
             }
-
         }
-
-
 
         static IEnumerable<IEnumerable<string>> CreateTable(LocalizationProject prj, Verbs.Export options)
         {
@@ -106,34 +90,6 @@ namespace ExportStrings.Workers
             //Console.ReadKey();
         }
 
-        IEnumerable<LocalizationProject> CreateProjects(IEnumerable<StringsFile> files)
-        {
-            if (verb.SingleFile)
-            {
-                return new LocalizationProject(null, files).Yield();
-            }
-            else
-            {
-                return files
-                    .GroupBy(x => x.ProjectPath)
-                    .Select(x => new LocalizationProject(x.Key, x));
-            }
-        }
-
-        IEnumerable<string> ResolvePaths(string path, string filter)
-        {
-            if (File.Exists(path))
-            {
-                yield return path;
-            }
-            else
-            {
-                foreach (var file in Directory.GetFiles(path, filter, SearchOption.AllDirectories))
-                {
-                    yield return Path.GetFullPath(file);
-                }
-            }
-        }
 
 
     }

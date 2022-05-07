@@ -10,5 +10,6 @@ namespace ExportStrings.LocProject
     {
         public const string LPROJ_EXTENSION = ".lproj";
         public const string LPROJ_BASE_LOCALE_NAME = "Base";
+        public const string STRINGS_SEARCH_FILTER = "*.strings";
     }
 }

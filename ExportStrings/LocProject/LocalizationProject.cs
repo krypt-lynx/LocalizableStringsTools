@@ -1,6 +1,7 @@
 ﻿using StringsCore;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,6 +10,7 @@ namespace ExportStrings.LocProject
 {
     public class LocalizationProject : ILocalizable, ILocaleMappable
     {
+        public string Name { get; private set; }
         public string Path { get; private set; }
         public StringsFile[] Files { get; private set; }
 
@@ -21,16 +23,42 @@ namespace ExportStrings.LocProject
             } 
         }
 
-        public LocalizationProject(string path, IEnumerable<StringsFile> files, string baseLocale = Constants.LPROJ_BASE_LOCALE_NAME)
+        public LocalizationProject(string path, string name, string baseLocale = Constants.LPROJ_BASE_LOCALE_NAME)
         {
             Path = path;
-            Files = files.ToArray();
+            Name = name;
             BaseLocale = baseLocale;
+
+            LoadFiles();
+        }
+
+        private void LoadFiles()
+        {
+            var dir = new DirectoryInfo(Path);
+            List<StringsFile> files = new List<StringsFile>();
+            foreach (var lproj in dir.GetDirectories("*" + Constants.LPROJ_EXTENSION))
+            {
+                var strings = lproj.GetFiles(Constants.STRINGS_SEARCH_FILTER);
+                if (strings.Length == 0)
+                {
+                    continue;
+                }
+
+                if (strings.Length > 1)
+                {
+                    throw new Exception($"more then one .strings-file at path {lproj.FullName}");
+                }
+
+                string locale = lproj.Name.Substring(0, lproj.Name.Length - Constants.LPROJ_EXTENSION.Length);
+                files.Add(new StringsFile(strings.First().FullName, locale));
+            }
+
+            Files = files.ToArray();
         }
 
         public override string ToString()
         {
-            return $"Project: {Path}; {Files?.Length ?? 0} file(s)";
+            return $"Project: {Name}; Path: {Path}; {Files?.Length ?? 0} file(s)";
         }
 
         public IEnumerable<string> Keys
